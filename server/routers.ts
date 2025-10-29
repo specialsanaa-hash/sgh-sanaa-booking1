@@ -1,10 +1,11 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
+import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, createFormResponse, getFormResponsesByBooking } from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -17,12 +18,137 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  campaigns: router({
+    list: publicProcedure.query(async () => {
+      const campaigns = await getCampaigns();
+      return campaigns;
+    }),
+    getById: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getCampaignById(input);
+    }),
+    create: protectedProcedure
+      .input(z.object({ name: z.string(), description: z.string().optional() }))
+      .mutation(async ({ input, ctx }) => {
+        return createCampaign({
+          name: input.name,
+          description: input.description,
+          createdBy: ctx.user.id,
+        });
+      }),
+  }),
+
+  forms: router({
+    listByCampaign: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getFormsByCampaign(input);
+    }),
+    getById: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getFormById(input);
+    }),
+    create: protectedProcedure
+      .input(
+        z.object({
+          campaignId: z.number(),
+          title: z.string(),
+          description: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        return createForm({
+          campaignId: input.campaignId,
+          title: input.title,
+          description: input.description,
+          createdBy: ctx.user.id,
+          isActive: 1,
+        });
+      }),
+    update: protectedProcedure
+      .input(z.object({ id: z.number(), title: z.string().optional(), description: z.string().optional(), isActive: z.number().optional() }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateForm(id, data);
+      }),
+  }),
+
+  formFields: router({
+    list: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getFormFields(input);
+    }),
+    create: protectedProcedure
+      .input(
+        z.object({
+          formId: z.number(),
+          fieldName: z.string(),
+          fieldType: z.enum(["text", "email", "phone", "number", "select", "textarea", "date"]),
+          label: z.string(),
+          isRequired: z.number().optional(),
+          placeholder: z.string().optional(),
+          options: z.string().optional(),
+          order: z.number(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        return createFormField(input);
+      }),
+    update: protectedProcedure
+      .input(z.object({ id: z.number(), label: z.string().optional(), isRequired: z.number().optional(), placeholder: z.string().optional(), options: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateFormField(id, data);
+      }),
+    delete: protectedProcedure.input(z.number()).mutation(async ({ input }) => {
+      return deleteFormField(input);
+    }),
+  }),
+
+  bookings: router({
+    list: protectedProcedure
+      .input(z.object({ formId: z.number().optional(), campaignId: z.number().optional() }))
+      .query(async ({ input }) => {
+        return getBookings(input.formId, input.campaignId);
+      }),
+    getById: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getBookingById(input);
+    }),
+    create: publicProcedure
+      .input(
+        z.object({
+          formId: z.number(),
+          campaignId: z.number(),
+          patientName: z.string(),
+          patientEmail: z.string().email().optional(),
+          patientPhone: z.string(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const result = await createBooking({
+          ...input,
+          status: "pending",
+        });
+        return result;
+      }),
+    updateStatus: protectedProcedure
+      .input(z.object({ id: z.number(), status: z.enum(["pending", "confirmed", "cancelled", "completed"]) }))
+      .mutation(async ({ input }) => {
+        return updateBooking(input.id, { status: input.status });
+      }),
+  }),
+
+  formResponses: router({
+    create: publicProcedure
+      .input(
+        z.object({
+          bookingId: z.number(),
+          fieldId: z.number(),
+          value: z.string(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        return createFormResponse(input);
+      }),
+    getByBooking: publicProcedure.input(z.number()).query(async ({ input }) => {
+      return getFormResponsesByBooking(input);
+    }),
+  })
 });
 
 export type AppRouter = typeof appRouter;
