@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO campaigns (name, description, startDate, endDate, createdAt, updatedAt) VALUES ('المخيم الخيري الأول في جراحة القلب والقسطرة القلبية', 'عرض خاص للأسبوع الخيري الأول - خدمات متخصصة في جراحة القلب والقسطرة القلبية بأسعار مخصصة', '2025-10-20', '2025-11-10', NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute INSERT INTO campaigns (name, description, startDate, endDate, createdAt, updatedAt) VALUES ('المخيم الخيري الأول في جراحة القلب والقسطرة القلبية', 'عرض خاص للأسبوع الخيري الأول - خدمات متخصصة في جراحة القلب والقسطرة القلبية بأسعار مخصصة', '2025-10-20', '2025-11-10', NOW(), NOW());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'startDate' in 'field list'"
+  ]
+}

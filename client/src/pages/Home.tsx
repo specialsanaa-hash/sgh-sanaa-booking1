@@ -17,7 +17,7 @@ export default function Home() {
             <img src={APP_LOGO} alt={APP_TITLE} className="h-10 w-auto" />
             <div>
               <h1 className="text-xl font-bold text-slate-900">{APP_TITLE}</h1>
-              <p className="text-xs text-slate-600">نعاكم كأهالينا</p>
+              <p className="text-xs text-slate-600">نرعاكم كأهالينا</p>
             </div>
           </div>
           <nav className="flex items-center gap-4">
