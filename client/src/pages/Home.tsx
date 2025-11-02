@@ -54,7 +54,7 @@ export default function Home() {
                 نقدم لكم خدمات طبية متميزة بأحدث التقنيات الطبية والكوادر الطبية المتخصصة. احجز موعدك بسهولة وسرعة من خلال منصتنا الإلكترونية.
               </p>
               <div className="flex gap-4 pt-4">
-                <Link href="/booking">
+                <Link href="/booking/1">
                   <Button size="lg" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800">
                     ابدأ الحجز الآن
                   </Button>

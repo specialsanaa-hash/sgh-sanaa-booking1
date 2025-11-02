@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM bookings ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute SELECT * FROM bookings ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "formId": "1",
+      "campaignId": "1",
+      "patientName": "فاطمة أحمد محمود",
+      "patientEmail": "",
+      "patientPhone": "920098765432",
+      "status": "pending",
+      "notes": "NULL",
+      "createdAt": "2025-11-02 20:13:52",
+      "updatedAt": "2025-11-02 20:13:52"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tformId\tcampaignId\tpatientName\tpatientEmail\tpatientPhone\tstatus\tnotes\tcreatedAt\tupdatedAt\n1\t1\t1\tفاطمة أحمد محمود\t\t920098765432\tpending\tNULL\t2025-11-02 20:13:52\t2025-11-02 20:13:52\n",
+  "stderr": "",
+  "execution_time_ms": 699
+}

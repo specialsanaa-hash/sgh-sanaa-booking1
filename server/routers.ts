@@ -115,7 +115,7 @@ export const appRouter = router({
           formId: z.number(),
           campaignId: z.number(),
           patientName: z.string(),
-          patientEmail: z.string().email().optional(),
+          patientEmail: z.string().email().optional().or(z.literal("")),
           patientPhone: z.string(),
         })
       )

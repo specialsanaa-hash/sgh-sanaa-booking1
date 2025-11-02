@@ -69,7 +69,7 @@ export default function Booking() {
         patientPhone: formData.patientPhone || "",
       });
 
-      const bookingId = (bookingResult as any).insertId || 0;
+      const bookingId = (bookingResult as any).id || (bookingResult as any).insertId || 0;
 
       // Create form responses
       if (fields) {

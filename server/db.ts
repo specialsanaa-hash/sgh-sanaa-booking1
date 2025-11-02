@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -194,7 +194,9 @@ export async function createBooking(data: InsertBooking) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const result = await db.insert(bookings).values(data);
-  return result;
+  // Get the inserted booking ID
+  const insertedBooking = await db.select().from(bookings).where(eq(bookings.patientPhone, data.patientPhone)).orderBy(desc(bookings.id)).limit(1);
+  return insertedBooking[0] || result;
 }
 
 export async function updateBooking(id: number, data: Partial<InsertBooking>) {
