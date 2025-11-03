@@ -9,12 +9,18 @@ import Booking from "./pages/Booking";
 import Dashboard from "./pages/Dashboard";
 import FormBuilder from "./pages/FormBuilder";
 import ExportBookings from "./pages/ExportBookings";
+import BookingTypes from "./pages/BookingTypes";
+import MedicalCamps from "./pages/MedicalCamps";
+import DoctorBooking from "./pages/DoctorBooking";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/booking-types"} component={BookingTypes} />
+      <Route path={"/medical-camps"} component={MedicalCamps} />
+      <Route path={"/doctor-booking"} component={DoctorBooking} />
       <Route path={"/booking/:formId"} component={Booking} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/form-builder/:formId"} component={FormBuilder} />

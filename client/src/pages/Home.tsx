@@ -21,17 +21,8 @@ export default function Home() {
             </div>
           </div>
           <nav className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="outline">لوحة التحكم</Button>
-                </Link>
-                <span className="text-sm text-slate-600">{user?.name}</span>
-              </>
-            ) : (
-              <a href={getLoginUrl()}>
-                <Button>تسجيل الدخول</Button>
-              </a>
+            {isAuthenticated && (
+              <span className="text-sm text-slate-600">{user?.name}</span>
             )}
           </nav>
         </div>
@@ -54,7 +45,7 @@ export default function Home() {
                 نقدم لكم خدمات طبية متميزة بأحدث التقنيات الطبية والكوادر الطبية المتخصصة. احجز موعدك بسهولة وسرعة من خلال منصتنا الإلكترونية.
               </p>
               <div className="flex gap-4 pt-4">
-                <Link href="/booking/1">
+                <Link href="/booking-types">
                   <Button size="lg" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800">
                     ابدأ الحجز الآن
                   </Button>
