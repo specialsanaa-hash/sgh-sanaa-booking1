@@ -120,9 +120,15 @@ export default function FormBuilder() {
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">{form.title}</h1>
-          <p className="text-slate-600 mt-1">{form.description}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{form.title}</h1>
+            <p className="text-slate-600 mt-1">{form.description}</p>
+          </div>
+          <Button variant="outline" className="gap-2">
+            <Eye className="h-4 w-4" />
+            معاينة النموذج
+          </Button>
         </div>
 
         {/* Add New Field */}

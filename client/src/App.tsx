@@ -9,6 +9,7 @@ import Booking from "./pages/Booking";
 import Dashboard from "./pages/Dashboard";
 import FormBuilder from "./pages/FormBuilder";
 import ExportBookings from "./pages/ExportBookings";
+import BookingDetails from "./pages/BookingDetails";
 import BookingTypes from "./pages/BookingTypes";
 import MedicalCamps from "./pages/MedicalCamps";
 import DoctorBooking from "./pages/DoctorBooking";
@@ -25,6 +26,7 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/form-builder/:formId"} component={FormBuilder} />
       <Route path={"/export-bookings"} component={ExportBookings} />
+      <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

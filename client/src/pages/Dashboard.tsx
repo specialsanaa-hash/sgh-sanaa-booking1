@@ -10,11 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { trpc } from "@/lib/trpc";
 import { 
   Loader2, Plus, Edit2, Trash2, Eye, Download, TrendingUp, Users, 
-  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText, Settings
+  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -22,25 +21,34 @@ export default function Dashboard() {
   const [showNewCampaignForm, setShowNewCampaignForm] = useState(false);
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newCampaignDesc, setNewCampaignDesc] = useState("");
-  const [newCampaignStartDate, setNewCampaignStartDate] = useState("");
-  const [newCampaignEndDate, setNewCampaignEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
   // Queries
   const { data: campaigns, isLoading: campaignsLoading, refetch: refetchCampaigns } = trpc.campaigns.list.useQuery();
-  const { data: bookings, isLoading: bookingsLoading } = trpc.bookings.list.useQuery({
+  const { data: bookings, isLoading: bookingsLoading, refetch: refetchBookings } = trpc.bookings.list.useQuery({
     campaignId: selectedCampaign || undefined,
+  });
+  const { data: forms, isLoading: formsLoading, refetch: refetchForms } = trpc.forms.listByCampaign.useQuery(selectedCampaign || 0, {
+    enabled: !!selectedCampaign,
   });
 
   // Mutations
+  const deleteBookingMutation = trpc.bookings.delete.useMutation({
+    onSuccess: () => {
+      toast.success("تم حذف الحجز بنجاح");
+      refetchBookings();
+    },
+    onError: (error) => {
+      toast.error("حدث خطأ أثناء حذف الحجز: " + error.message);
+    },
+  });
+
   const createCampaignMutation = trpc.campaigns.create.useMutation({
     onSuccess: () => {
       toast.success("تم إنشاء الحملة بنجاح");
       setNewCampaignName("");
       setNewCampaignDesc("");
-      setNewCampaignStartDate("");
-      setNewCampaignEndDate("");
       setShowNewCampaignForm(false);
       refetchCampaigns();
     },
@@ -49,200 +57,118 @@ export default function Dashboard() {
     },
   });
 
+  // Handlers
   const handleCreateCampaign = async () => {
     if (!newCampaignName.trim()) {
       toast.error("يرجى إدخال اسم الحملة");
       return;
     }
-    await createCampaignMutation.mutateAsync({
+    createCampaignMutation.mutate({
       name: newCampaignName,
       description: newCampaignDesc,
     });
   };
 
-  // Filter bookings based on search and status
-  const filteredBookings = bookings?.filter((booking) => {
-    const matchesSearch = 
-      booking.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.patientPhone.includes(searchQuery);
-    const matchesStatus = filterStatus === "all" || booking.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  }) || [];
+  const handleDeleteBooking = (bookingId: number) => {
+    if (confirm("هل أنت متأكد من حذف هذا الحجز؟")) {
+      deleteBookingMutation.mutate(bookingId);
+    }
+  };
 
-  // Calculate statistics
+  const handleExportBookings = () => {
+    if (!bookings || bookings.length === 0) {
+      toast.error("لا توجد حجوزات للتصدير");
+      return;
+    }
+    toast.success("جاري تصدير البيانات...");
+  };
+
+  // Statistics
   const totalBookings = bookings?.length || 0;
   const confirmedBookings = bookings?.filter(b => b.status === "confirmed").length || 0;
   const pendingBookings = bookings?.filter(b => b.status === "pending").length || 0;
   const completedBookings = bookings?.filter(b => b.status === "completed").length || 0;
   const cancelledBookings = bookings?.filter(b => b.status === "cancelled").length || 0;
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-red-600">غير مصرح</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-600">ليس لديك صلاحية للوصول إلى لوحة التحكم. يرجى التواصل مع المسؤول.</p>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <p className="text-lg text-slate-600">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</p>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="space-y-6" dir="rtl">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">لوحة التحكم</h1>
-            <p className="text-slate-600 mt-2">مرحباً {user?.name}، إدارة الحملات والحجوزات</p>
+            <h1 className="text-3xl font-bold text-slate-900">لوحة التحكم</h1>
+            <p className="text-slate-600 mt-2">إدارة الحملات والحجوزات والنماذج</p>
           </div>
-          <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-green-600 hover:bg-green-700">
-                <Plus className="h-5 w-5" />
-                حملة جديدة
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md" dir="rtl">
-              <DialogHeader>
-                <DialogTitle>إنشاء حملة إعلانية جديدة</DialogTitle>
-                <DialogDescription>
-                  أضف حملة جديدة لاستقبال الحجوزات من المرضى
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="campaign-name">اسم الحملة *</Label>
-                  <Input
-                    id="campaign-name"
-                    value={newCampaignName}
-                    onChange={(e) => setNewCampaignName(e.target.value)}
-                    placeholder="مثال: المخيم الخيري الأول"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="campaign-desc">الوصف</Label>
-                  <Input
-                    id="campaign-desc"
-                    value={newCampaignDesc}
-                    onChange={(e) => setNewCampaignDesc(e.target.value)}
-                    placeholder="وصف الحملة والخدمات المقدمة"
-                    className="mt-1"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="campaign-start">تاريخ البداية</Label>
-                    <Input
-                      id="campaign-start"
-                      type="date"
-                      value={newCampaignStartDate}
-                      onChange={(e) => setNewCampaignStartDate(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="campaign-end">تاريخ النهاية</Label>
-                    <Input
-                      id="campaign-end"
-                      type="date"
-                      value={newCampaignEndDate}
-                      onChange={(e) => setNewCampaignEndDate(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={handleCreateCampaign}
-                    disabled={createCampaignMutation.isPending}
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                  >
-                    {createCampaignMutation.isPending ? (
-                      <>
-                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                        جاري الإنشاء...
-                      </>
-                    ) : (
-                      "إنشاء الحملة"
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowNewCampaignForm(false)}
-                    className="flex-1"
-                  >
-                    إلغاء
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-600">إجمالي الحجوزات</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-slate-900">{totalBookings}</p>
-                <Users className="h-8 w-8 text-blue-500 opacity-20" />
+                <span className="text-3xl font-bold text-slate-900">{totalBookings}</span>
+                <Users className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-600">مؤكدة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-green-600">{confirmedBookings}</p>
-                <CheckCircle className="h-8 w-8 text-green-500 opacity-20" />
+                <span className="text-3xl font-bold text-green-600">{confirmedBookings}</span>
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-600">قيد الانتظار</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-yellow-600">{pendingBookings}</p>
-                <Clock className="h-8 w-8 text-yellow-500 opacity-20" />
+                <span className="text-3xl font-bold text-yellow-600">{pendingBookings}</span>
+                <Clock className="h-8 w-8 text-yellow-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-600">مكتملة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-purple-600">{completedBookings}</p>
-                <TrendingUp className="h-8 w-8 text-purple-500 opacity-20" />
+                <span className="text-3xl font-bold text-purple-600">{completedBookings}</span>
+                <TrendingUp className="h-8 w-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-600">ملغاة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-red-600">{cancelledBookings}</p>
-                <XCircle className="h-8 w-8 text-red-500 opacity-20" />
+                <span className="text-3xl font-bold text-red-600">{cancelledBookings}</span>
+                <XCircle className="h-8 w-8 text-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -267,12 +193,55 @@ export default function Dashboard() {
 
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">إدارة الحملات</h2>
+              <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 bg-green-600 hover:bg-green-700">
+                    <Plus className="h-4 w-4" />
+                    حملة جديدة
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>إنشاء حملة جديدة</DialogTitle>
+                    <DialogDescription>أضف حملة إعلانية جديدة للمستشفى</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="campaign-name">اسم الحملة</Label>
+                      <Input
+                        id="campaign-name"
+                        value={newCampaignName}
+                        onChange={(e) => setNewCampaignName(e.target.value)}
+                        placeholder="مثال: المخيم الخيري الأول"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="campaign-desc">الوصف</Label>
+                      <Input
+                        id="campaign-desc"
+                        value={newCampaignDesc}
+                        onChange={(e) => setNewCampaignDesc(e.target.value)}
+                        placeholder="وصف الحملة"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleCreateCampaign}
+                      disabled={createCampaignMutation.isPending}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      {createCampaignMutation.isPending ? "جاري الإنشاء..." : "إنشاء الحملة"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             {campaignsLoading ? (
-              <Card>
-                <CardContent className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                </CardContent>
-              </Card>
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+              </div>
             ) : campaigns && campaigns.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {campaigns.map((campaign) => (
@@ -293,9 +262,6 @@ export default function Dashboard() {
                             {campaign.description || "بدون وصف"}
                           </CardDescription>
                         </div>
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -322,96 +288,86 @@ export default function Dashboard() {
 
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle>إدارة الحجوزات</CardTitle>
-                    <CardDescription>
-                      {selectedCampaign ? "الحجوزات للحملة المختارة" : "جميع الحجوزات"}
-                    </CardDescription>
-                  </div>
-                  <Link href="/export-bookings">
-                    <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-                      <Download className="h-4 w-4" />
-                      تصدير Excel
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Search and Filter */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    placeholder="ابحث عن اسم أو هاتف..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10"
-                  />
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="تصفية حسب الحالة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الحالات</SelectItem>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="confirmed">مؤكدة</SelectItem>
-                      <SelectItem value="completed">مكتملة</SelectItem>
-                      <SelectItem value="cancelled">ملغاة</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="flex items-center justify-between gap-4">
+              <Input
+                placeholder="البحث عن حجز..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="تصفية حسب الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="pending">قيد الانتظار</SelectItem>
+                  <SelectItem value="confirmed">مؤكدة</SelectItem>
+                  <SelectItem value="completed">مكتملة</SelectItem>
+                  <SelectItem value="cancelled">ملغاة</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handleExportBookings} className="gap-2 bg-blue-600 hover:bg-blue-700">
+                <Download className="h-4 w-4" />
+                تصدير
+              </Button>
+            </div>
 
-                {/* Bookings Table */}
-                {bookingsLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                  </div>
-                ) : filteredBookings.length > 0 ? (
+            {bookingsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+              </div>
+            ) : bookings && bookings.length > 0 ? (
+              <Card>
+                <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full">
                       <thead>
-                        <tr className="border-b-2 border-slate-200 bg-slate-50">
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">اسم المريض</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الهاتف</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">البريد</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الحالة</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">التاريخ</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الإجراءات</th>
+                        <tr className="border-b bg-slate-50">
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">اسم المريض</th>
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">الهاتف</th>
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">الحالة</th>
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">التاريخ</th>
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredBookings.map((booking) => (
-                          <tr key={booking.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                            <td className="py-4 px-4 font-medium text-slate-900">{booking.patientName}</td>
-                            <td className="py-4 px-4 text-slate-600">{booking.patientPhone}</td>
-                            <td className="py-4 px-4 text-slate-600 text-xs">{booking.patientEmail || "-"}</td>
-                            <td className="py-4 px-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${
-                                booking.status === "confirmed"
-                                  ? "bg-green-100 text-green-800"
-                                  : booking.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : booking.status === "cancelled"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-purple-100 text-purple-800"
+                        {bookings.map((booking) => (
+                          <tr key={booking.id} className="border-b hover:bg-slate-50">
+                            <td className="px-6 py-3 text-sm text-slate-900">{booking.patientName}</td>
+                            <td className="px-6 py-3 text-sm text-slate-600">{booking.patientPhone}</td>
+                            <td className="px-6 py-3 text-sm">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                booking.status === "confirmed" ? "bg-green-100 text-green-800" :
+                                booking.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                                booking.status === "completed" ? "bg-blue-100 text-blue-800" :
+                                "bg-red-100 text-red-800"
                               }`}>
-                                {booking.status === "confirmed" && "✓ مؤكد"}
-                                {booking.status === "pending" && "⏱ قيد الانتظار"}
-                                {booking.status === "cancelled" && "✕ ملغى"}
-                                {booking.status === "completed" && "✓ مكتمل"}
+                                {booking.status === "confirmed" ? "مؤكدة" :
+                                 booking.status === "pending" ? "قيد الانتظار" :
+                                 booking.status === "completed" ? "مكتملة" :
+                                 "ملغاة"}
                               </span>
                             </td>
-                            <td className="py-4 px-4 text-slate-600 text-sm">
+                            <td className="px-6 py-3 text-sm text-slate-600">
                               {new Date(booking.createdAt).toLocaleDateString("ar-SA")}
                             </td>
-                            <td className="py-4 px-4">
+                            <td className="px-6 py-3 text-sm">
                               <div className="flex gap-2">
-                                <Link href={`/booking-details/${booking.id}`}>
-                                  <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </Link>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                  onClick={() => handleDeleteBooking(booking.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </td>
                           </tr>
@@ -419,15 +375,17 @@ export default function Dashboard() {
                       </tbody>
                     </table>
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600 text-lg">لا توجد حجوزات</p>
-                    <p className="text-slate-500 text-sm mt-2">لم يتم العثور على حجوزات مطابقة</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-12 w-12 text-slate-300 mb-4" />
+                  <p className="text-slate-600 text-lg">لا توجد حجوزات</p>
+                  <p className="text-slate-500 text-sm mt-2">لم يتم العثور على حجوزات مطابقة</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Reports Tab */}
@@ -435,64 +393,56 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">توزيع الحالات</CardTitle>
+                  <CardTitle>توزيع الحالات</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
+                <CardContent>
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">مؤكدة</span>
+                      <span className="text-slate-600">مؤكدة</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-green-500" 
-                            style={{width: `${totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0}%`}}
+                        <div className="w-32 bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{ width: `${totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0}%` }}
                           />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 w-12 text-right">
-                          {totalBookings > 0 ? Math.round((confirmedBookings / totalBookings) * 100) : 0}%
-                        </span>
+                        <span className="font-bold text-green-600">{confirmedBookings}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">قيد الانتظار</span>
+                      <span className="text-slate-600">قيد الانتظار</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-yellow-500" 
-                            style={{width: `${totalBookings > 0 ? (pendingBookings / totalBookings) * 100 : 0}%`}}
+                        <div className="w-32 bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-yellow-600 h-2 rounded-full"
+                            style={{ width: `${totalBookings > 0 ? (pendingBookings / totalBookings) * 100 : 0}%` }}
                           />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 w-12 text-right">
-                          {totalBookings > 0 ? Math.round((pendingBookings / totalBookings) * 100) : 0}%
-                        </span>
+                        <span className="font-bold text-yellow-600">{pendingBookings}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">مكتملة</span>
+                      <span className="text-slate-600">مكتملة</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-purple-500" 
-                            style={{width: `${totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0}%`}}
+                        <div className="w-32 bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-purple-600 h-2 rounded-full"
+                            style={{ width: `${totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0}%` }}
                           />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 w-12 text-right">
-                          {totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0}%
-                        </span>
+                        <span className="font-bold text-purple-600">{completedBookings}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">ملغاة</span>
+                      <span className="text-slate-600">ملغاة</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-red-500" 
-                            style={{width: `${totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0}%`}}
+                        <div className="w-32 bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-red-600 h-2 rounded-full"
+                            style={{ width: `${totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0}%` }}
                           />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 w-12 text-right">
-                          {totalBookings > 0 ? Math.round((cancelledBookings / totalBookings) * 100) : 0}%
-                        </span>
+                        <span className="font-bold text-red-600">{cancelledBookings}</span>
                       </div>
                     </div>
                   </div>
@@ -501,28 +451,26 @@ export default function Dashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">الإحصائيات السريعة</CardTitle>
+                  <CardTitle>الإحصائيات</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <p className="text-xs text-blue-600 font-medium">إجمالي الحملات</p>
-                      <p className="text-2xl font-bold text-blue-900 mt-2">{campaigns?.length || 0}</p>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-slate-600 text-sm">نسبة الإتمام</p>
+                      <p className="text-2xl font-bold text-purple-900 mt-2">
+                        {totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0}%
+                      </p>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <p className="text-xs text-green-600 font-medium">معدل التأكيد</p>
+                    <div>
+                      <p className="text-slate-600 text-sm">معدل التأكيد</p>
                       <p className="text-2xl font-bold text-green-900 mt-2">
                         {totalBookings > 0 ? Math.round((confirmedBookings / totalBookings) * 100) : 0}%
                       </p>
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg">
-                      <p className="text-xs text-yellow-600 font-medium">قيد الانتظار</p>
-                      <p className="text-2xl font-bold text-yellow-900 mt-2">{pendingBookings}</p>
-                    </div>
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <p className="text-xs text-purple-600 font-medium">معدل الإكمال</p>
-                      <p className="text-2xl font-bold text-purple-900 mt-2">
-                        {totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0}%
+                    <div>
+                      <p className="text-slate-600 text-sm">الحجوزات المعلقة</p>
+                      <p className="text-2xl font-bold text-yellow-900 mt-2">
+                        {pendingBookings}
                       </p>
                     </div>
                   </div>

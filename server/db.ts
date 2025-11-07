@@ -143,6 +143,15 @@ export async function updateForm(id: number, data: Partial<InsertForm>) {
   return db.update(forms).set(data).where(eq(forms.id, id));
 }
 
+export async function deleteForm(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Delete related form fields first
+  await db.delete(formFields).where(eq(formFields.formId, id));
+  // Then delete the form
+  return db.delete(forms).where(eq(forms.id, id));
+}
+
 // ============ Form Fields ============
 export async function getFormFields(formId: number) {
   const db = await getDb();
@@ -203,6 +212,15 @@ export async function updateBooking(id: number, data: Partial<InsertBooking>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return db.update(bookings).set(data).where(eq(bookings.id, id));
+}
+
+export async function deleteBooking(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Delete form responses first due to foreign key constraint
+  await db.delete(formResponses).where(eq(formResponses.bookingId, id));
+  // Then delete the booking
+  return db.delete(bookings).where(eq(bookings.id, id));
 }
 
 // ============ Form Responses ============
