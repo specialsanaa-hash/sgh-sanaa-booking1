@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse } from "../drizzle/schema";
+import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse, activityLogs, InsertActivityLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -234,4 +234,17 @@ export async function getFormResponsesByBooking(bookingId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(formResponses).where(eq(formResponses.bookingId, bookingId));
+}
+
+// ============ Activity Logs ============
+export async function createActivityLog(data: InsertActivityLog) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(activityLogs).values(data);
+}
+
+export async function getActivityLogs() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt));
 }

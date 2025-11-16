@@ -137,7 +137,7 @@ export default function FormBuilder() {
             <CardTitle>إضافة حقل جديد</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="field-name">اسم الحقل</Label>
                 <Input
@@ -183,7 +183,7 @@ export default function FormBuilder() {
                 />
               </div>
               {newField.fieldType === "select" && (
-                <div className="md:col-span-2">
+                <div className="sm:col-span-2">
                   <Label htmlFor="field-options">الخيارات (مفصولة بفواصل)</Label>
                   <Input
                     id="field-options"
@@ -204,7 +204,7 @@ export default function FormBuilder() {
               <Button
                 onClick={handleAddField}
                 disabled={createFieldMutation.isPending}
-                className="md:col-span-2 gap-2"
+                className="sm:col-span-2 gap-2"
               >
                 <Plus className="h-4 w-4" />
                 {createFieldMutation.isPending ? "جاري الإضافة..." : "إضافة الحقل"}

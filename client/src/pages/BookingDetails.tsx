@@ -49,13 +49,13 @@ export default function BookingDetails() {
     enabled: !isNaN(bookingId),
   });
 
-  const { data: responses, isLoading: responsesLoading } = trpc.formResponses.getByBooking.useQuery(bookingId, {
-    enabled: !isNaN(bookingId),
-  });
-
   if (booking === undefined && !bookingLoading) {
     toast.error("حدث خطأ أثناء جلب تفاصيل الحجز");
   }
+
+  const { data: responses, isLoading: responsesLoading } = trpc.formResponses.getByBooking.useQuery(bookingId, {
+    enabled: !isNaN(bookingId),
+  });
 
   if (!isAuthenticated || user?.role !== "admin") {
     return (

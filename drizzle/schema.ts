@@ -113,3 +113,20 @@ export const formResponses = mysqlTable("formResponses", {
 
 export type FormResponse = typeof formResponses.$inferSelect;
 export type InsertFormResponse = typeof formResponses.$inferInsert;
+
+/**
+ * جدول سجلات الأنشطة (ActivityLogs)
+ * يسجل جميع الأنشطة الهامة التي يقوم بها المسؤولون
+ */
+export const activityLogs = mysqlTable("activityLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  action: varchar("action", { length: 255 }).notNull(), // مثال: 'CREATE_CAMPAIGN', 'UPDATE_BOOKING_STATUS'
+  details: text("details"), // تفاصيل إضافية (مثل اسم الحملة، رقم الحجز)
+  targetId: int("targetId"), // ID الكائن المتأثر (حملة، حجز، نموذج)
+  targetType: mysqlEnum("targetType", ["campaign", "booking", "form", "user"]),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ActivityLog = typeof activityLogs.$inferSelect;
+export type InsertActivityLog = typeof activityLogs.$inferInsert;

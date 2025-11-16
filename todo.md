@@ -80,3 +80,15 @@
 - [x] إصلاح أخطاء TypeScript في Dashboard.tsx و BookingDetails.tsx
 - [x] إضافة الدوال المفقودة deleteForm و deleteBooking إلى imports
 - [x] إعادة تشغيل خادم التطوير بنجاح
+
+
+## إصلاحات دمج PR #2 (Phase 2)
+- [x] قبول ودمج طلب السحب #2 من Khalid
+- [x] إصلاح أخطاء JSX في Dashboard.tsx من PR #2
+- [x] إصلاح أخطاء TypeScript في index.css (رمز مفقود في السطر 54)
+- [x] إصلاح خطأ onError في BookingDetails.tsx
+- [x] إصلاح خطأ insertId في server/routers.ts
+- [x] حذف ملف i18n.ts لعدم توفر مكتبات i18next
+- [x] إزالة استيراد i18n من main.tsx
+- [x] إعادة تشغيل خادم التطوير بنجاح
+- [x] الموقع يعمل بدون أخطاء

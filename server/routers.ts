@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking } from "./db";
+import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking, createActivityLog, getActivityLogs } from "./db";
 
 export const appRouter = router({
   system: systemRouter,
@@ -29,11 +29,13 @@ export const appRouter = router({
     create: adminProcedure
       .input(z.object({ name: z.string(), description: z.string().optional() }))
       .mutation(async ({ input, ctx }) => {
-        return createCampaign({
+        const result = await createCampaign({
           name: input.name,
           description: input.description,
           createdBy: ctx.user.id,
         });
+
+        return result;
       }),
   }),
 
@@ -53,22 +55,44 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        return createForm({
+        const result = await createForm({
           campaignId: input.campaignId,
           title: input.title,
           description: input.description,
           createdBy: ctx.user.id,
           isActive: 1,
         });
+
+        return result;
       }),
     update: adminProcedure
       .input(z.object({ id: z.number(), title: z.string().optional(), description: z.string().optional(), isActive: z.number().optional() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
-        return updateForm(id, data);
+        const result = await updateForm(id, data);
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'UPDATE_FORM',
+          details: `تم تحديث النموذج رقم ${id}`,
+          targetId: id,
+          targetType: 'form',
+        });
+
+        return result;
       }),
-    delete: adminProcedure.input(z.number()).mutation(async ({ input }) => {
-      return deleteForm(input);
+    delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+      const result = await deleteForm(input);
+
+      await createActivityLog({
+        userId: ctx.user.id,
+        action: 'DELETE_FORM',
+        details: `تم حذف النموذج رقم ${input}`,
+        targetId: input,
+        targetType: 'form',
+      });
+
+      return result;
     }),
   }),
 
@@ -89,17 +113,47 @@ export const appRouter = router({
           order: z.number(),
         })
       )
-      .mutation(async ({ input }) => {
-        return createFormField(input);
+      .mutation(async ({ input, ctx }) => {
+        const result = await createFormField(input);
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'CREATE_FORM_FIELD',
+          details: `تم إنشاء حقل جديد ${input.fieldName} للنموذج ${input.formId}`,
+          targetId: input.formId,
+          targetType: 'form',
+        });
+
+        return result;
       }),
     update: adminProcedure
       .input(z.object({ id: z.number(), label: z.string().optional(), isRequired: z.number().optional(), placeholder: z.string().optional(), options: z.string().optional() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
-        return updateFormField(id, data);
+        const result = await updateFormField(id, data);
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'UPDATE_FORM_FIELD',
+          details: `تم تحديث الحقل رقم ${id}`,
+          targetId: id,
+          targetType: 'form',
+        });
+
+        return result;
       }),
-    delete: adminProcedure.input(z.number()).mutation(async ({ input }) => {
-      return deleteFormField(input);
+    delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+      const result = await deleteFormField(input);
+
+      await createActivityLog({
+        userId: ctx.user.id,
+        action: 'DELETE_FORM_FIELD',
+        details: `تم حذف الحقل رقم ${input}`,
+        targetId: input,
+        targetType: 'form',
+      });
+
+      return result;
     }),
   }),
 
@@ -129,13 +183,33 @@ export const appRouter = router({
         });
         return result;
       }),
-    delete: adminProcedure.input(z.number()).mutation(async ({ input }) => {
-      return deleteBooking(input);
+    delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+      const result = await deleteBooking(input);
+
+      await createActivityLog({
+        userId: ctx.user.id,
+        action: 'DELETE_BOOKING',
+        details: `تم حذف الحجز رقم ${input}`,
+        targetId: input,
+        targetType: 'booking',
+      });
+
+      return result;
     }),
     updateStatus: adminProcedure
       .input(z.object({ id: z.number(), status: z.enum(["pending", "confirmed", "cancelled", "completed"]) }))
-      .mutation(async ({ input }) => {
-        return updateBooking(input.id, { status: input.status });
+      .mutation(async ({ input, ctx }) => {
+        const result = await updateBooking(input.id, { status: input.status });
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'UPDATE_BOOKING_STATUS',
+          details: `تم تحديث حالة الحجز رقم ${input.id} إلى ${input.status}`,
+          targetId: input.id,
+          targetType: 'booking',
+        });
+
+        return result;
       }),
   }),
 
@@ -154,7 +228,13 @@ export const appRouter = router({
     getByBooking: publicProcedure.input(z.number()).query(async ({ input }) => {
       return getFormResponsesByBooking(input);
     }),
-  })
+  }),
+
+  activityLogs: router({
+    list: adminProcedure.query(async () => {
+      return getActivityLogs();
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
