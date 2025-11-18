@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, title, campaignId FROM forms LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute SELECT id, title, campaignId FROM forms LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "نموذج التسجيل - المخيم الخيري الأول في جراحة القلب والقسطرة",
+      "campaignId": "30001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcampaignId\n1\tنموذج التسجيل - المخيم الخيري الأول في جراحة القلب والقسطرة\t30001\n",
+  "stderr": "",
+  "execution_time_ms": 495
+}

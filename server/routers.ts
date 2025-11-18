@@ -44,7 +44,8 @@ export const appRouter = router({
       return getFormsByCampaign(input);
     }),
     getById: publicProcedure.input(z.number()).query(async ({ input }) => {
-      return getFormById(input);
+      const form = await getFormById(input);
+      return form || null;
     }),
     create: adminProcedure
       .input(
