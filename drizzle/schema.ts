@@ -79,6 +79,8 @@ export const formFields = mysqlTable("formFields", {
 export type FormField = typeof formFields.$inferSelect;
 export type InsertFormField = typeof formFields.$inferInsert;
 
+export type FormFieldType = typeof formFields.fieldType.enumValues[number];
+
 /**
  * جدول الحجوزات (Bookings)
  * يحتفظ بجميع بيانات الحجوزات المقدمة من المرضى

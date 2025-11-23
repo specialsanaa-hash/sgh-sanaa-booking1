@@ -2,6 +2,7 @@ import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse, activityLogs, InsertActivityLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { notifyNewBooking } from "./pusher";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -205,7 +206,15 @@ export async function createBooking(data: InsertBooking) {
   const result = await db.insert(bookings).values(data);
   // Get the inserted booking ID
   const insertedBooking = await db.select().from(bookings).where(eq(bookings.patientPhone, data.patientPhone)).orderBy(desc(bookings.id)).limit(1);
-  return insertedBooking[0] || result;
+  
+  const newBooking = insertedBooking[0] || result;
+
+  // إرسال إشعار فوري
+  if (newBooking.id) {
+    await notifyNewBooking(newBooking.id, data.patientName);
+  }
+
+  return newBooking;
 }
 
 export async function updateBooking(id: number, data: Partial<InsertBooking>) {

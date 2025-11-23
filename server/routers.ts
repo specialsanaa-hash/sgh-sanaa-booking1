@@ -4,6 +4,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking, createActivityLog, getActivityLogs } from "./db";
+import { webhookRouter } from "./routers/webhook";
+import { metaRouter } from "./routers/meta";
 
 export const appRouter = router({
   system: systemRouter,
@@ -34,6 +36,17 @@ export const appRouter = router({
           description: input.description,
           createdBy: ctx.user.id,
         });
+        // Get the inserted campaign ID from the database
+        const campaigns_list = await getCampaignById(ctx.user.id);
+        const campaignId = campaigns_list?.id || 0;
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'CREATE_CAMPAIGN',
+          details: `تم إنشاء حملة جديدة: ${input.name}`,
+          targetId: campaignId,
+          targetType: 'campaign',
+        });
 
         return result;
       }),
@@ -44,8 +57,7 @@ export const appRouter = router({
       return getFormsByCampaign(input);
     }),
     getById: publicProcedure.input(z.number()).query(async ({ input }) => {
-      const form = await getFormById(input);
-      return form || null;
+      return getFormById(input);
     }),
     create: adminProcedure
       .input(
@@ -62,6 +74,17 @@ export const appRouter = router({
           description: input.description,
           createdBy: ctx.user.id,
           isActive: 1,
+        });
+        // Get the inserted form ID from the database
+        const forms_list = await getFormsByCampaign(input.campaignId);
+        const formId = forms_list?.[forms_list.length - 1]?.id || 0;
+
+        await createActivityLog({
+          userId: ctx.user.id,
+          action: 'CREATE_FORM',
+          details: `تم إنشاء نموذج جديد: ${input.title} للحملة ${input.campaignId}`,
+          targetId: formId,
+          targetType: 'form',
         });
 
         return result;
@@ -236,6 +259,9 @@ export const appRouter = router({
       return getActivityLogs();
     }),
   }),
+
+  webhook: webhookRouter,
+  meta: metaRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -3,8 +3,10 @@ import { UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
+// Pusher provider is not needed in main.tsx
 import superjson from "superjson";
 import App from "./App";
+import { pusherClient } from "./pusher";
 import { getLoginUrl } from "./const";
 import "./index.css";
 

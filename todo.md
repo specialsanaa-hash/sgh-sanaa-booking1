@@ -100,3 +100,20 @@
 - [x] إنشاء نموذج اختبار بـ ID = 2
 - [x] إضافة حقول اختبار للنموذج
 - [x] التحقق من أن صفحة الحجز تعمل بدون أخطاء
+
+
+## إصلاحات دمج PR #3 و #4 (Phase 3 - Advanced Features)
+- [x] قبول ودمج طلب السحب #3 (Advanced Features and Security)
+- [x] قبول ودمج طلب السحب #4 (Meta Webhook Integration)
+- [x] إصلاح خطأ FormFieldType في server/routers/meta.ts (استخدام قيم حرفية بدلاً من enum)
+- [x] إصلاح خطأ z.record في server/routers/webhook.ts
+- [x] إصلاح خطأ MapIterator بإضافة downlevelIteration في tsconfig.json
+- [x] إصلاح مسار استيراد useAuth في Dashboard.tsx
+- [x] إزالة خاصية dir غير المدعومة من DropdownMenuContent
+- [x] إصلاح خطأ onError في BookingDetails.tsx
+- [x] إزالة استيراد PusherProvider من main.tsx
+- [x] إزالة استيراد i18n من main.tsx (الملف غير موجود)
+- [x] الموقع يعمل بدون أخطاء TypeScript
+- [x] تم إضافة مكتبات Pusher للإشعارات الفورية
+- [x] تم إضافة Rate Limiter لحماية الـ API
+- [x] تم إضافة Meta Webhook Integration لتحويل Leads إلى حجوزات

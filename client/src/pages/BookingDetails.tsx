@@ -48,7 +48,7 @@ export default function BookingDetails() {
   const { data: booking, isLoading: bookingLoading } = trpc.bookings.getById.useQuery(bookingId, {
     enabled: !isNaN(bookingId),
   });
-
+  
   if (booking === undefined && !bookingLoading) {
     toast.error("حدث خطأ أثناء جلب تفاصيل الحجز");
   }

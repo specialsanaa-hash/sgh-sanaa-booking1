@@ -2,13 +2,27 @@ import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
+import { rateLimiter } from "./rateLimiter";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
 });
 
+// Middleware لتطبيق Rate Limiting على جميع الإجراءات العامة
+const rateLimitMiddleware = t.middleware(async opts => {
+  const { ctx, next } = opts;
+
+  // تطبيق Rate Limiting على أساس IP
+  // يجب أن يكون IP متاحاً في السياق (Context)
+  if (ctx.req.ip) {
+    rateLimiter(ctx.req.ip);
+  }
+
+  return next();
+});
+
 export const router = t.router;
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(rateLimitMiddleware);
 
 const requireUser = t.middleware(async opts => {
   const { ctx, next } = opts;
