@@ -17,6 +17,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
+import { getLoginUrl } from "@/const";
 import { dashboardChannel } from "../pusher";
 
 export default function Dashboard() {
@@ -141,7 +142,28 @@ export default function Dashboard() {
     'الحجوزات': bookings?.filter(b => b.campaignId === campaign.id).length || 0,
   })) || [];
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-blue-600">تسجيل الدخول مطلوب</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-slate-600">يرجى تسجيل الدخول للوصول إلى لوحة التحكم.</p>
+            <Button 
+              onClick={() => window.location.href = getLoginUrl()} 
+              className="w-full"
+            >
+              تسجيل الدخول
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (user?.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Card className="w-full max-w-md">
