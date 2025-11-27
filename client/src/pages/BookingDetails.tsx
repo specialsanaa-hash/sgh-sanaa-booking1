@@ -45,11 +45,11 @@ export default function BookingDetails() {
   const bookingId = parseInt(params.id as string);
 
   // Queries
-  const { data: booking, isLoading: bookingLoading } = trpc.bookings.getById.useQuery(bookingId, {
+  const { data: booking, isLoading: bookingLoading, error: bookingError } = trpc.bookings.getById.useQuery(bookingId, {
     enabled: !isNaN(bookingId),
   });
-  
-  if (booking === undefined && !bookingLoading) {
+
+  if (bookingError) {
     toast.error("حدث خطأ أثناء جلب تفاصيل الحجز");
   }
 

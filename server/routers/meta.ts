@@ -1,7 +1,7 @@
 import { publicProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { createBooking, createFormResponse } from "../db";
-// FormFieldType is a string literal type from the schema
+import { FormFieldType } from "../../drizzle/schema";
 import { getFormFields } from "../db";
 import { getCampaignById } from "../db";
 import crypto from "crypto";
@@ -96,11 +96,11 @@ export const metaRouter = router({
               
               if (matchingField) {
                 // Map core fields
-                if (matchingField.fieldType === "text" && fieldName.toLowerCase().includes("name")) {
+                if (matchingField.fieldType === 'text' && fieldName.toLowerCase().includes("name")) {
                   patientName = fieldValue;
-                } else if (matchingField.fieldType === "phone") {
+                } else if (matchingField.fieldType === 'phone') {
                   patientPhone = fieldValue;
-                } else if (matchingField.fieldType === "email") {
+                } else if (matchingField.fieldType === 'email') {
                   patientEmail = fieldValue;
                 }
                 

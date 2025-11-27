@@ -1,5 +1,6 @@
-import { publicProcedure, router } from "../_core/trpc";
+import { router, publicProcedure } from "../_core/trpc";
 import { z } from "zod";
+import { createActivityLog } from "../db";
 
 // يتم استخدام هذا الإجراء كـ Webhook لتلقي إشعارات من أنظمة خارجية (مثل CRM)
 // لا يتطلب مصادقة (publicProcedure) لأنه يُفترض أن النظام الخارجي يرسل مفتاح سري (Secret Key) للتحقق
@@ -17,12 +18,20 @@ export const webhookRouter = router({
       // التحقق من المفتاح السري (يجب أن يكون هذا المفتاح محفوظاً في متغيرات البيئة)
       // في هذا المثال، سنفترض أن المفتاح السري هو "CRM_SECRET_KEY"
       if (input.secret !== "CRM_SECRET_KEY") {
-        console.error(`[Webhook] فشل التحقق من مفتاح الويب هوك السري للحدث: ${input.event}`);
+        await createActivityLog({
+          userId: 0,
+          action: 'webhook_error',
+          details: `فشل التحقق من مفتاح الويب هوك السري للحدث: ${input.event}`,
+        });
         throw new Error("Unauthorized Webhook Access");
       }
 
       // تسجيل النشاط
-      console.log(`[Webhook] تم استلام ويب هوك للحدث: ${input.event}`);
+      await createActivityLog({
+        userId: 0,
+        action: 'webhook_received',
+        details: `تم استلام ويب هوك للحدث: ${input.event}`,
+      });
 
       // هنا يمكن إضافة منطق معالجة الحمولة (Payload)
       // مثال: تحديث حالة حجز معين بناءً على الـ payload

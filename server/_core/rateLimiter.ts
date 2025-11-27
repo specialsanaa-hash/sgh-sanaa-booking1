@@ -38,11 +38,9 @@ export function rateLimiter(ip: string) {
 // تنظيف السجلات القديمة بشكل دوري (للتخفيف من استهلاك الذاكرة)
 setInterval(() => {
   const now = Date.now();
-  const entriesToDelete: string[] = [];
   for (const [ip, record] of requestCounts.entries()) {
     if (record.resetTime < now) {
-      entriesToDelete.push(ip);
+      requestCounts.delete(ip);
     }
   }
-  entriesToDelete.forEach(ip => requestCounts.delete(ip));
 }, WINDOW_MS);

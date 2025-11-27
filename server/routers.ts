@@ -36,9 +36,7 @@ export const appRouter = router({
           description: input.description,
           createdBy: ctx.user.id,
         });
-        // Get the inserted campaign ID from the database
-        const campaigns_list = await getCampaignById(ctx.user.id);
-        const campaignId = campaigns_list?.id || 0;
+        const campaignId = (result as any).insertId || 0;
 
         await createActivityLog({
           userId: ctx.user.id,
@@ -75,9 +73,7 @@ export const appRouter = router({
           createdBy: ctx.user.id,
           isActive: 1,
         });
-        // Get the inserted form ID from the database
-        const forms_list = await getFormsByCampaign(input.campaignId);
-        const formId = forms_list?.[forms_list.length - 1]?.id || 0;
+        const formId = (result as any).insertId || 0;
 
         await createActivityLog({
           userId: ctx.user.id,
