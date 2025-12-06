@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 // In a production environment, use Redis or a dedicated rate limiting service.
 const requestCounts = new Map<string, { count: number, resetTime: number }>();
 
-const MAX_REQUESTS = 5; // الحد الأقصى لعدد الطلبات
+const MAX_REQUESTS = 30; // الحد الأقصى لعدد الطلبات
 const WINDOW_MS = 60000; // فترة السماح بالمللي ثانية (دقيقة واحدة)
 
 /**

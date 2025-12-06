@@ -19,12 +19,12 @@ export default function ExportBookings() {
   // Queries
   const { data: campaigns } = trpc.campaigns.list.useQuery();
   const { data: bookings, isLoading: bookingsLoading } = trpc.bookings.list.useQuery({
-    campaignId: selectedCampaign ? parseInt(selectedCampaign) : undefined,
+    campaignId: selectedCampaign && selectedCampaign !== "all" ? parseInt(selectedCampaign) : undefined,
   });
 
   // Filter bookings based on selected criteria
   const filteredBookings = bookings?.filter((booking) => {
-    if (selectedStatus && booking.status !== selectedStatus) return false;
+    if (selectedStatus && selectedStatus !== "all" && booking.status !== selectedStatus) return false;
     
     const bookingDate = new Date(booking.createdAt);
     if (dateFrom) {
@@ -125,7 +125,7 @@ export default function ExportBookings() {
                     <SelectValue placeholder="جميع الحملات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الحملات</SelectItem>
+                    <SelectItem value="all">جميع الحملات</SelectItem>
                     {campaigns?.map((campaign) => (
                       <SelectItem key={campaign.id} value={campaign.id.toString()}>
                         {campaign.name}
@@ -142,7 +142,7 @@ export default function ExportBookings() {
                     <SelectValue placeholder="جميع الحالات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="pending">قيد الانتظار</SelectItem>
                     <SelectItem value="confirmed">مؤكد</SelectItem>
                     <SelectItem value="cancelled">ملغى</SelectItem>
