@@ -31,14 +31,19 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  // Queries
-  const { data: campaigns, isLoading: campaignsLoading, refetch: refetchCampaigns } = trpc.campaigns.list.useQuery();
-  const { data: bookings, isLoading: bookingsLoading, refetch: refetchBookings } = trpc.bookings.list.useQuery({
+  // تحقق من المصادقة والدور في البداية
+  const isAdmin = isAuthenticated && user?.role === "admin";
 
+  // Queries - تعطيل الـ queries إذا لم يكن المستخدم admin
+  const { data: campaigns, isLoading: campaignsLoading, refetch: refetchCampaigns } = trpc.campaigns.list.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  const { data: bookings, isLoading: bookingsLoading, refetch: refetchBookings } = trpc.bookings.list.useQuery({}, {
+    enabled: isAdmin,
   });
 
   const { data: forms, isLoading: formsLoading, refetch: refetchForms } = trpc.forms.listByCampaign.useQuery(selectedCampaign || 0, {
-    enabled: !!selectedCampaign,
+    enabled: isAdmin && !!selectedCampaign,
   });
 
   // Mutations
@@ -141,21 +146,6 @@ export default function Dashboard() {
     name: campaign.name,
     'الحجوزات': bookings?.filter(b => b.campaignId === campaign.id).length || 0,
   })) || [];
-
-  if (!isAuthenticated || user?.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-red-600">غير مصرح</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-600">ليس لديك صلاحية للوصول إلى لوحة التحكم. يرجى التواصل مع المسؤول.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Pusher Real-time Notifications
   useEffect(() => {

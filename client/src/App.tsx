@@ -13,6 +13,40 @@ import BookingDetails from "./pages/BookingDetails";
 import BookingTypes from "./pages/BookingTypes";
 import MedicalCamps from "./pages/MedicalCamps";
 import DoctorBooking from "./pages/DoctorBooking";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+// مكون محمي للـ admin فقط
+function ProtectedAdminRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = isAuthenticated && user?.role === "admin";
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">غير مصرح</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-slate-600">ليس لديك صلاحية للوصول إلى هذه الصفحة.</p>
+            {!isAuthenticated && (
+              <Button 
+                className="w-full" 
+                onClick={() => window.location.href = `/`}
+              >
+                العودة إلى الصفحة الرئيسية
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return <Component />;
+}
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -23,9 +57,9 @@ function Router() {
       <Route path={"/medical-camps"} component={MedicalCamps} />
       <Route path={"/doctor-booking"} component={DoctorBooking} />
       <Route path={"/booking/:formId"} component={Booking} />
-      <Route path={"/dashboard"} component={Dashboard} />
-      <Route path={"/form-builder/:formId"} component={FormBuilder} />
-      <Route path={"/export-bookings"} component={ExportBookings} />
+      <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
+      <Route path={"/form-builder/:formId"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
+      <Route path={"/export-bookings"} component={() => <ProtectedAdminRoute component={ExportBookings} />} />
       <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
