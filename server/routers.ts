@@ -6,6 +6,9 @@ import { z } from "zod";
 import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking, createActivityLog, getActivityLogs } from "./db";
 import { webhookRouter } from "./routers/webhook";
 import { metaRouter } from "./routers/meta";
+import { doctorsRouter } from "./routers/doctors";
+import { staticPagesRouter } from "./routers/staticPages";
+import { doctorBookingsRouter } from "./routers/doctorBookings";
 
 export const appRouter = router({
   system: systemRouter,
@@ -258,6 +261,9 @@ export const appRouter = router({
 
   webhook: webhookRouter,
   meta: metaRouter,
+  doctors: doctorsRouter,
+  staticPages: staticPagesRouter,
+  doctorBookings: doctorBookingsRouter,
 });
 
 export type AppRouter = typeof appRouter;

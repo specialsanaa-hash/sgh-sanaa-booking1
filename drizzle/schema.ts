@@ -132,3 +132,75 @@ export const activityLogs = mysqlTable("activityLogs", {
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = typeof activityLogs.$inferInsert;
+
+/**
+ * جدول الأطباء (Doctors)
+ * يحتفظ بمعلومات الأطباء وتخصصاتهم
+ */
+export const doctors = mysqlTable("doctors", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  specialty: varchar("specialty", { length: 255 }).notNull(), // التخصص: جراحة، باطنية، إلخ
+  bio: text("bio"), // نبذة عن الطبيب
+  image: varchar("image", { length: 500 }), // رابط صورة الطبيب
+  experience: varchar("experience", { length: 100 }), // سنوات الخبرة
+  qualifications: text("qualifications"), // المؤهلات العلمية (JSON)
+  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 320 }),
+  isActive: int("isActive").default(1).notNull(), // 1 = نشط، 0 = غير نشط
+  slug: varchar("slug", { length: 255 }).unique().notNull(), // URL slug للصفحة الثابتة
+  metaTitle: varchar("metaTitle", { length: 255 }), // SEO Meta Title
+  metaDescription: varchar("metaDescription", { length: 500 }), // SEO Meta Description
+  createdBy: int("createdBy").notNull().references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Doctor = typeof doctors.$inferSelect;
+export type InsertDoctor = typeof doctors.$inferInsert;
+
+/**
+ * جدول الصفحات الثابتة (StaticPages)
+ * صفحات ثابتة قابلة للفهرسة من محركات البحث (عن المستشفى، الخدمات، إلخ)
+ */
+export const staticPages = mysqlTable("staticPages", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(), // URL slug
+  content: text("content").notNull(), // محتوى الصفحة (HTML/Markdown)
+  excerpt: text("excerpt"), // ملخص الصفحة
+  image: varchar("image", { length: 500 }), // صورة الصفحة
+  isPublished: int("isPublished").default(1).notNull(), // 1 = منشورة، 0 = مسودة
+  isVisible: int("isVisible").default(1).notNull(), // 1 = مرئية، 0 = مخفية
+  order: int("order").default(0).notNull(), // ترتيب الصفحة في القائمة
+  metaTitle: varchar("metaTitle", { length: 255 }), // SEO Meta Title
+  metaDescription: varchar("metaDescription", { length: 500 }), // SEO Meta Description
+  metaKeywords: varchar("metaKeywords", { length: 500 }), // SEO Keywords
+  canonicalUrl: varchar("canonicalUrl", { length: 500 }), // Canonical URL
+  createdBy: int("createdBy").notNull().references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StaticPage = typeof staticPages.$inferSelect;
+export type InsertStaticPage = typeof staticPages.$inferInsert;
+
+/**
+ * جدول حجوزات الأطباء (DoctorBookings)
+ * يحتفظ بحجوزات المرضى عند الأطباء
+ */
+export const doctorBookings = mysqlTable("doctorBookings", {
+  id: int("id").autoincrement().primaryKey(),
+  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
+  patientName: varchar("patientName", { length: 255 }).notNull(),
+  patientEmail: varchar("patientEmail", { length: 320 }),
+  patientPhone: varchar("patientPhone", { length: 20 }).notNull(),
+  appointmentDate: timestamp("appointmentDate"), // موعد الحجز
+  status: mysqlEnum("status", ["pending", "confirmed", "cancelled", "completed"]).default("pending").notNull(),
+  notes: text("notes"), // ملاحظات إضافية
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DoctorBooking = typeof doctorBookings.$inferSelect;
+export type InsertDoctorBooking = typeof doctorBookings.$inferInsert;

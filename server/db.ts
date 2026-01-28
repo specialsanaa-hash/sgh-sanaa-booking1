@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse, activityLogs, InsertActivityLog } from "../drizzle/schema";
+import { InsertUser, users, campaigns, forms, formFields, bookings, formResponses, InsertCampaign, InsertForm, InsertFormField, InsertBooking, InsertFormResponse, activityLogs, InsertActivityLog, doctors, staticPages, doctorBookings, InsertDoctor, InsertStaticPage, InsertDoctorBooking } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { notifyNewBooking } from "./pusher";
 
@@ -256,4 +256,117 @@ export async function getActivityLogs() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt));
+}
+
+// ============ Doctors ============
+export async function createDoctor(data: InsertDoctor) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(doctors).values(data);
+}
+
+export async function getDoctors() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(doctors).where(eq(doctors.isActive, 1)).orderBy(doctors.name);
+}
+
+export async function getDoctorBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(doctors).where(eq(doctors.slug, slug)).limit(1);
+  return result[0] || null;
+}
+
+export async function getDoctorById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(doctors).where(eq(doctors.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateDoctor(id: number, data: Partial<InsertDoctor>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(doctors).set(data).where(eq(doctors.id, id));
+}
+
+export async function deleteDoctor(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Delete doctor bookings first due to foreign key constraint
+  await db.delete(doctorBookings).where(eq(doctorBookings.doctorId, id));
+  // Then delete the doctor
+  return db.delete(doctors).where(eq(doctors.id, id));
+}
+
+// ============ Static Pages ============
+export async function createStaticPage(data: InsertStaticPage) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(staticPages).values(data);
+}
+
+export async function getStaticPages() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(staticPages).where(eq(staticPages.isPublished, 1)).orderBy(staticPages.order);
+}
+
+export async function getStaticPageBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(staticPages).where(eq(staticPages.slug, slug)).limit(1);
+  return result[0] || null;
+}
+
+export async function getStaticPageById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(staticPages).where(eq(staticPages.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateStaticPage(id: number, data: Partial<InsertStaticPage>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(staticPages).set(data).where(eq(staticPages.id, id));
+}
+
+export async function deleteStaticPage(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(staticPages).where(eq(staticPages.id, id));
+}
+
+// ============ Doctor Bookings ============
+export async function createDoctorBooking(data: InsertDoctorBooking) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(doctorBookings).values(data);
+}
+
+export async function getDoctorBookings(doctorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(doctorBookings).where(eq(doctorBookings.doctorId, doctorId)).orderBy(desc(doctorBookings.createdAt));
+}
+
+export async function getDoctorBookingById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(doctorBookings).where(eq(doctorBookings.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateDoctorBooking(id: number, data: Partial<InsertDoctorBooking>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(doctorBookings).set(data).where(eq(doctorBookings.id, id));
+}
+
+export async function deleteDoctorBooking(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(doctorBookings).where(eq(doctorBookings.id, id));
 }

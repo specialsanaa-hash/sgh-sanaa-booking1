@@ -13,6 +13,9 @@ import BookingDetails from "./pages/BookingDetails";
 import BookingTypes from "./pages/BookingTypes";
 import MedicalCamps from "./pages/MedicalCamps";
 import DoctorBooking from "./pages/DoctorBooking";
+import Doctors from "./pages/Doctors";
+import DoctorDetail from "./pages/DoctorDetail";
+import StaticPage from "./pages/StaticPage";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,6 +59,9 @@ function Router() {
       <Route path={"/booking-types"} component={BookingTypes} />
       <Route path={"/medical-camps"} component={MedicalCamps} />
       <Route path={"/doctor-booking"} component={DoctorBooking} />
+      <Route path={"/doctors"} component={Doctors} />
+      <Route path={"/doctors/:slug"} component={DoctorDetail} />
+      <Route path={"/page/:slug"} component={StaticPage} />
       <Route path={"/booking/:formId"} component={Booking} />
       <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
       <Route path={"/form-builder/:formId"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
