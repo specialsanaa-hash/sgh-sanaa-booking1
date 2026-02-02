@@ -16,6 +16,8 @@ import DoctorBooking from "./pages/DoctorBooking";
 import Doctors from "./pages/Doctors";
 import DoctorDetail from "./pages/DoctorDetail";
 import StaticPage from "./pages/StaticPage";
+import ManageDoctors from "./pages/dashboard/ManageDoctors";
+import ManageStaticPages from "./pages/dashboard/ManageStaticPages";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +68,8 @@ function Router() {
       <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
       <Route path={"/form-builder/:formId"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
       <Route path={"/export-bookings"} component={() => <ProtectedAdminRoute component={ExportBookings} />} />
+      <Route path={"/dashboard/manage-doctors"} component={() => <ProtectedAdminRoute component={ManageDoctors} />} />
+      <Route path={"/dashboard/manage-pages"} component={() => <ProtectedAdminRoute component={ManageStaticPages} />} />
       <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

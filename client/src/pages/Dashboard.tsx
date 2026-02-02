@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { trpc } from "@/lib/trpc";
 import { 
   Loader2, Plus, Edit2, Trash2, Eye, Download, TrendingUp, Users, 
-  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText, Settings
+  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText, Settings, Stethoscope, BookOpen
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useState, useEffect } from "react";
@@ -173,6 +173,49 @@ export default function Dashboard() {
             <h1 className="text-4xl font-bold text-slate-900">لوحة التحكم</h1>
             <p className="text-slate-600 mt-2">مرحباً {user?.name}، إدارة الحملات والحجوزات</p>
           </div>
+        </div>
+
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link href="/doctors">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <Stethoscope className="h-8 w-8 text-blue-600 mb-2" />
+                <h3 className="font-semibold">الأطباء</h3>
+                <p className="text-sm text-muted-foreground">عرض قائمة الأطباء</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/manage-doctors">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <Users className="h-8 w-8 text-green-600 mb-2" />
+                <h3 className="font-semibold">إدارة الأطباء</h3>
+                <p className="text-sm text-muted-foreground">إضافة وتعديل الأطباء</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/manage-pages">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <FileText className="h-8 w-8 text-purple-600 mb-2" />
+                <h3 className="font-semibold">إدارة الصفحات</h3>
+                <p className="text-sm text-muted-foreground">إنشاء صفحات ثابتة</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/bookings">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <BookOpen className="h-8 w-8 text-orange-600 mb-2" />
+                <h3 className="font-semibold">الحجوزات</h3>
+                <p className="text-sm text-muted-foreground">عرض جميع الحجوزات</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+        {/* Campaigns Section */}
+        <div>
           <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
             <DialogTrigger asChild>
               <Button className="gap-2 bg-green-600 hover:bg-green-700">
