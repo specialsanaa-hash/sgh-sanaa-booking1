@@ -18,6 +18,7 @@ import DoctorDetail from "./pages/DoctorDetail";
 import StaticPage from "./pages/StaticPage";
 import ManageDoctors from "./pages/dashboard/ManageDoctors";
 import ManageStaticPages from "./pages/dashboard/ManageStaticPages";
+import About from "./pages/About";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,19 +59,19 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/booking"} component={Booking} />
       <Route path={"/booking-types"} component={BookingTypes} />
       <Route path={"/medical-camps"} component={MedicalCamps} />
-      <Route path={"/doctor-booking"} component={DoctorBooking} />
       <Route path={"/doctors"} component={Doctors} />
-      <Route path={"/doctors/:slug"} component={DoctorDetail} />
+      <Route path={"/doctor/:id"} component={DoctorDetail} />
       <Route path={"/page/:slug"} component={StaticPage} />
-      <Route path={"/booking/:formId"} component={Booking} />
-      <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
-      <Route path={"/form-builder/:formId"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
+      <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/export-bookings"} component={() => <ProtectedAdminRoute component={ExportBookings} />} />
+      <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
+      <Route path={"/dashboard/form-builder"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
       <Route path={"/dashboard/manage-doctors"} component={() => <ProtectedAdminRoute component={ManageDoctors} />} />
       <Route path={"/dashboard/manage-pages"} component={() => <ProtectedAdminRoute component={ManageStaticPages} />} />
-      <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

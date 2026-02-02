@@ -20,7 +20,12 @@ export default function Home() {
               <p className="text-xs text-slate-600">نرعاكم كأهالينا</p>
             </div>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-6">
+            <Link href="/about">
+              <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
+                عن المستشفى
+              </Button>
+            </Link>
             {isAuthenticated && (
               <span className="text-sm text-slate-600">{user?.name}</span>
             )}
