@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -56,6 +57,12 @@ function ProtectedAdminRoute({ component: Component }: { component: React.Compon
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
+  // Set RTL direction for all pages
+  React.useEffect(() => {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
+  }, []);
+
   return (
     <Switch>
       <Route path={"/"} component={Home} />
