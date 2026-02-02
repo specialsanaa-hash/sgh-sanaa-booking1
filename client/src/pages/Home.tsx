@@ -21,6 +21,11 @@ export default function Home() {
             </div>
           </div>
           <nav className="flex items-center gap-6">
+            <Link href="/website">
+              <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
+                الموقع الإلكتروني
+              </Button>
+            </Link>
             <Link href="/about">
               <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
                 عن المستشفى
@@ -96,6 +101,23 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Website Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-12 text-white text-center">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">استكشف موقعنا الإلكتروني</h3>
+            <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+              تعرف على المزيد عن المستشفى السعودي الألماني - صنعاء، أقسامنا الطبية، الأطباء المتخصصين، والخدمات الصحية المتميزة
+            </p>
+            <Link href="/website">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold">
+                زيارة الموقع الإلكتروني
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -20,6 +20,12 @@ import StaticPage from "./pages/StaticPage";
 import ManageDoctors from "./pages/dashboard/ManageDoctors";
 import ManageStaticPages from "./pages/dashboard/ManageStaticPages";
 import About from "./pages/About";
+import Website from "./pages/Website";
+import AboutPage from "./pages/AboutPage";
+import SpecialtiesPage from "./pages/SpecialtiesPage";
+import DoctorsPage from "./pages/DoctorsPage";
+import NewsPage from "./pages/NewsPage";
+import ContactPage from "./pages/ContactPage";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +72,12 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/website"} component={Website} />
+      <Route path={"/website/about"} component={AboutPage} />
+      <Route path={"/website/specialties"} component={SpecialtiesPage} />
+      <Route path={"/website/doctors"} component={DoctorsPage} />
+      <Route path={"/website/news"} component={NewsPage} />
+      <Route path={"/website/contact"} component={ContactPage} />
       <Route path={"/about"} component={About} />
       <Route path={"/booking"} component={Booking} />
       <Route path={"/booking-types"} component={BookingTypes} />
