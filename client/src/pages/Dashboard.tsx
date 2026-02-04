@@ -11,9 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { trpc } from "@/lib/trpc";
 import { 
   Loader2, Plus, Edit2, Trash2, Eye, Download, TrendingUp, Users, 
-  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText, Settings, Stethoscope, BookOpen
+  Calendar, CheckCircle, Clock, XCircle, BarChart3, FileText, Settings, Stethoscope, BookOpen,
+  ArrowUpRight, ArrowDownRight, AlertCircle
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -166,59 +167,16 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6" dir="rtl">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="space-y-8" dir="rtl">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
           <div>
             <h1 className="text-4xl font-bold text-slate-900">لوحة التحكم</h1>
             <p className="text-slate-600 mt-2">مرحباً {user?.name}، إدارة الحملات والحجوزات</p>
           </div>
-        </div>
-
-        {/* Quick Access Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/doctors">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <Stethoscope className="h-8 w-8 text-blue-600 mb-2" />
-                <h3 className="font-semibold">الأطباء</h3>
-                <p className="text-sm text-muted-foreground">عرض قائمة الأطباء</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/dashboard/manage-doctors">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <Users className="h-8 w-8 text-green-600 mb-2" />
-                <h3 className="font-semibold">إدارة الأطباء</h3>
-                <p className="text-sm text-muted-foreground">إضافة وتعديل الأطباء</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/dashboard/manage-pages">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <FileText className="h-8 w-8 text-purple-600 mb-2" />
-                <h3 className="font-semibold">إدارة الصفحات</h3>
-                <p className="text-sm text-muted-foreground">إنشاء صفحات ثابتة</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/dashboard/bookings">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <BookOpen className="h-8 w-8 text-orange-600 mb-2" />
-                <h3 className="font-semibold">الحجوزات</h3>
-                <p className="text-sm text-muted-foreground">عرض جميع الحجوزات</p>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-        {/* Campaigns Section */}
-        <div>
           <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-green-600 hover:bg-green-700">
+              <Button className="gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg">
                 <Plus className="h-5 w-5" />
                 حملة جديدة
               </Button>
@@ -301,57 +259,188 @@ export default function Dashboard() {
           </Dialog>
         </div>
 
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link href="/doctors">
+            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px] border-0 bg-gradient-to-br from-blue-50 to-blue-100">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3">
+                  <Stethoscope className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-900">الأطباء</h3>
+                <p className="text-sm text-slate-600 mt-1">عرض قائمة الأطباء</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/manage-doctors">
+            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px] border-0 bg-gradient-to-br from-green-50 to-green-100">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-3">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-900">إدارة الأطباء</h3>
+                <p className="text-sm text-slate-600 mt-1">إضافة وتعديل الأطباء</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/manage-pages">
+            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px] border-0 bg-gradient-to-br from-purple-50 to-purple-100">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-900">إدارة الصفحات</h3>
+                <p className="text-sm text-slate-600 mt-1">إنشاء صفحات ثابتة</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/bookings">
+            <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px] border-0 bg-gradient-to-br from-orange-50 to-orange-100">
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-3">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-900">الحجوزات</h3>
+                <p className="text-sm text-slate-600 mt-1">عرض جميع الحجوزات</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-slate-50 to-slate-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">إجمالي الحجوزات</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-slate-400" />
+                إجمالي الحجوزات
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-slate-900">{totalBookings}</div>
-              <p className="text-xs text-slate-500 mt-1">+20.1% من الشهر الماضي</p>
+              <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3" />
+                +20.1% من الشهر الماضي
+              </p>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-green-50 to-green-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">الحجوزات المؤكدة</CardTitle>
+              <CardTitle className="text-sm font-medium text-green-700 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                الحجوزات المؤكدة
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">{confirmedBookings}</div>
-              <p className="text-xs text-slate-500 mt-1">من إجمالي {totalBookings}</p>
+              <p className="text-xs text-slate-500 mt-2">من إجمالي {totalBookings}</p>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-yellow-50 to-yellow-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">قيد الانتظار</CardTitle>
+              <CardTitle className="text-sm font-medium text-yellow-700 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                قيد الانتظار
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-yellow-500">{pendingBookings}</div>
-              <p className="text-xs text-slate-500 mt-1">تحتاج إلى متابعة</p>
+              <div className="text-3xl font-bold text-yellow-600">{pendingBookings}</div>
+              <p className="text-xs text-slate-500 mt-2">تحتاج إلى متابعة</p>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-purple-50 to-purple-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">الحجوزات المكتملة</CardTitle>
+              <CardTitle className="text-sm font-medium text-purple-700 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                الحجوزات المكتملة
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600">{completedBookings}</div>
-              <p className="text-xs text-slate-500 mt-1">تمت خدمتهم</p>
+              <p className="text-xs text-slate-500 mt-2">تمت خدمتهم</p>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-red-50 to-red-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">الحجوزات الملغاة</CardTitle>
+              <CardTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                الحجوزات الملغاة
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-red-600">{cancelledBookings}</div>
-              <p className="text-xs text-slate-500 mt-1">تم الإلغاء</p>
+              <p className="text-xs text-slate-500 mt-2">تم الإلغاء</p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Pie Chart */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle>توزيع حالات الحجوزات</CardTitle>
+              <CardDescription>نسبة الحجوزات حسب الحالة</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {statusData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-80 text-slate-500">
+                  لا توجد بيانات للعرض
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Bar Chart */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle>الحجوزات حسب الحملات</CardTitle>
+              <CardDescription>عدد الحجوزات لكل حملة</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {campaignsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={campaignsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="الحجوزات" fill="#10B981" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-80 text-slate-500">
+                  لا توجد بيانات للعرض
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs Section */}
         <Tabs defaultValue="campaigns" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-100">
             <TabsTrigger value="campaigns" className="gap-2"><Calendar className="h-4 w-4" /> الحملات</TabsTrigger>
             <TabsTrigger value="bookings" className="gap-2"><Users className="h-4 w-4" /> الحجوزات</TabsTrigger>
             <TabsTrigger value="reports" className="gap-2"><BarChart3 className="h-4 w-4" /> التقارير</TabsTrigger>
@@ -359,7 +448,7 @@ export default function Dashboard() {
           </TabsList>
 
           {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="space-y-4">
+          <TabsContent value="campaigns" className="space-y-4 mt-6">
             {campaignsLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-green-600" />
@@ -369,17 +458,17 @@ export default function Dashboard() {
                 {campaigns.map((campaign) => (
                   <Card
                     key={campaign.id}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                    className={`cursor-pointer transition-all hover:shadow-lg border-0 ${
                       selectedCampaign === campaign.id
-                        ? "border-green-500 bg-green-50 ring-2 ring-green-200"
-                        : ""
+                        ? "bg-green-50 ring-2 ring-green-500 shadow-lg"
+                        : "bg-slate-50"
                     }`}
                     onClick={() => setSelectedCampaign(campaign.id)}
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{campaign.name}</CardTitle>
+                          <CardTitle className="text-lg text-slate-900">{campaign.name}</CardTitle>
                           <CardDescription className="mt-2 line-clamp-2">
                             {campaign.description || "بدون وصف"}
                           </CardDescription>
@@ -389,7 +478,7 @@ export default function Dashboard() {
                     <CardContent>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-600">الحجوزات:</span>
-                        <span className="font-bold text-green-600">
+                        <span className="font-bold text-green-600 text-lg">
                           {bookings?.filter(b => b.campaignId === campaign.id).length || 0}
                         </span>
                       </div>
@@ -398,212 +487,144 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Calendar className="h-12 w-12 text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">لا توجد حملات حالياً</p>
-                  <p className="text-slate-500 text-sm mt-2">ابدأ بإنشاء حملة جديدة</p>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-slate-300 mb-4" />
+                <p className="text-slate-600">لا توجد حملات حالياً</p>
+                <p className="text-sm text-slate-500 mt-1">قم بإنشاء حملة جديدة للبدء</p>
+              </div>
             )}
           </TabsContent>
 
           {/* Bookings Tab */}
-          <TabsContent value="bookings" className="space-y-4">
-            <Card>
+          <TabsContent value="bookings" className="space-y-4 mt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <Input
+                placeholder="ابحث عن المريض أو الهاتف..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1"
+              />
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="تصفية حسب الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="pending">قيد الانتظار</SelectItem>
+                  <SelectItem value="confirmed">مؤكدة</SelectItem>
+                  <SelectItem value="completed">مكتملة</SelectItem>
+                  <SelectItem value="cancelled">ملغاة</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {bookingsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : filteredBookings.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-100 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-900">المريض</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-900">الهاتف</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-900">التاريخ</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-900">الحالة</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-900">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBookings.map((booking) => (
+                      <tr key={booking.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3 text-slate-900 font-medium">{booking.patientName}</td>
+                        <td className="px-4 py-3 text-slate-600">{booking.patientPhone}</td>
+                        <td className="px-4 py-3 text-slate-600">{new Date(booking.createdAt).toLocaleDateString('ar-SA')}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            booking.status === 'completed' ? 'bg-purple-100 text-purple-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {booking.status === 'confirmed' ? 'مؤكدة' :
+                             booking.status === 'pending' ? 'قيد الانتظار' :
+                             booking.status === 'completed' ? 'مكتملة' :
+                             'ملغاة'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">⋯</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, 'confirmed')}>
+                                تأكيد
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, 'completed')}>
+                                إكمال
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, 'cancelled')}>
+                                إلغاء
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleDeleteBooking(booking.id)} className="text-red-600">
+                                حذف
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-slate-300 mb-4" />
+                <p className="text-slate-600">لا توجد حجوزات تطابق البحث</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-4 mt-6">
+            <Card className="border-0 shadow-sm">
               <CardHeader>
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle>إدارة الحجوزات</CardTitle>
-                    <CardDescription>
-                      {selectedCampaign ? "الحجوزات للحملة المختارة" : "جميع الحجوزات"}
-                    </CardDescription>
-                  </div>
-                  <Link href="/export-bookings">
-                    <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-                      <Download className="h-4 w-4" />
-                      تصدير Excel
-                    </Button>
-                  </Link>
-                </div>
+                <CardTitle>التقارير الشاملة</CardTitle>
+                <CardDescription>ملخص الأداء والإحصائيات</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Search and Filter */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    placeholder="ابحث عن اسم أو هاتف..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10"
-                  />
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="تصفية حسب الحالة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الحالات</SelectItem>
-                      <SelectItem value="pending">قيد الانتظار</SelectItem>
-                      <SelectItem value="confirmed">مؤكدة</SelectItem>
-                      <SelectItem value="completed">مكتملة</SelectItem>
-                      <SelectItem value="cancelled">ملغاة</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="p-4 bg-slate-50 rounded-lg">
+                    <p className="text-sm text-slate-600 mb-2">معدل التأكيد</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {totalBookings > 0 ? ((confirmedBookings / totalBookings) * 100).toFixed(1) : 0}%
+                    </p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-lg">
+                    <p className="text-sm text-slate-600 mb-2">معدل الإكمال</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {totalBookings > 0 ? ((completedBookings / totalBookings) * 100).toFixed(1) : 0}%
+                    </p>
+                  </div>
                 </div>
-
-                {/* Bookings Table */}
-                {bookingsLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                  </div>
-                ) : filteredBookings.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-slate-200 bg-slate-50">
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">اسم المريض</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الهاتف</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">البريد</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الحالة</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">التاريخ</th>
-                          <th className="text-right py-4 px-4 font-semibold text-slate-700">الإجراءات</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredBookings.map((booking) => (
-                          <tr key={booking.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                            <td className="py-4 px-4 font-medium text-slate-900">{booking.patientName}</td>
-                            <td className="py-4 px-4 text-slate-600">{booking.patientPhone}</td>
-                            <td className="py-4 px-4 text-slate-600 text-xs">{booking.patientEmail || "-"}</td>
-                            <td className="py-4 px-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-block ${
-                                booking.status === "confirmed"
-                                  ? "bg-green-100 text-green-800"
-                                  : booking.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : booking.status === "cancelled"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-purple-100 text-purple-800"
-                              }`}>
-                                {booking.status === "confirmed" && "✓ مؤكد"}
-                                {booking.status === "pending" && "⏱ قيد الانتظار"}
-                                {booking.status === "cancelled" && "✕ ملغى"}
-                                {booking.status === "completed" && "✓ مكتمل"}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 text-slate-600 text-sm">
-                              {new Date(booking.createdAt).toLocaleDateString("ar-SA")}
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex gap-2">
-                                <Link href={`/booking-details/${booking.id}`}>
-                                  <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </Link>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                                      <Edit2 className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>تغيير الحالة</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, "confirmed")}>
-                                      ✓ مؤكدة
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, "pending")}>
-                                      ⏱ قيد الانتظار
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, "completed")}>
-                                      ✓ مكتملة
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(booking.id, "cancelled")}>
-                                      ✕ ملغاة
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                                <Button size="sm" variant="destructive" className="h-8 w-8 p-0" onClick={() => handleDeleteBooking(booking.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600 text-lg">لا توجد حجوزات</p>
-                    <p className="text-slate-500 text-sm mt-2">لم يتم العثور على حجوزات مطابقة</p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-lg">توزيع الحجوزات حسب الحالة</CardTitle>
-                </CardHeader>
-                <CardContent className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={statusData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        fill="#8884d8"
-                        label
-                      >
-                        {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value, name) => [`${value} حجز`, name]} />
-                      <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">الإحصائيات السريعة</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <p className="text-xs text-blue-600 font-medium">إجمالي الحملات</p>
-                      <p className="text-2xl font-bold text-blue-900 mt-2">{campaigns?.length || 0}</p>
-                    </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <p className="text-xs text-green-600 font-medium">إجمالي النماذج</p>
-                      <p className="text-2xl font-bold text-green-900 mt-2">{forms?.length || 0}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <Card>
+          <TabsContent value="settings" className="space-y-4 mt-6">
+            <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>الإعدادات العامة</CardTitle>
+                <CardTitle>الإعدادات</CardTitle>
                 <CardDescription>إدارة إعدادات لوحة التحكم</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>سيتم إضافة المزيد من الإعدادات قريباً.</p>
+                <p className="text-slate-600">سيتم إضافة المزيد من الإعدادات قريباً</p>
               </CardContent>
             </Card>
           </TabsContent>
