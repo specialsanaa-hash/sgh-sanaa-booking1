@@ -88,17 +88,41 @@ export default function Website() {
               <a href="/website" className="text-gray-700 hover:text-blue-600 font-medium">
                 الرئيسية
               </a>
-              <a href="/website/about" className="text-gray-700 hover:text-blue-600">
-                عن المستشفى
+              <a href="/website/patients" className="text-gray-700 hover:text-blue-600">
+                المرضى والزوار
+              </a>
+              <a href="/website/branch" className="text-gray-700 hover:text-blue-600">
+                الفرع
               </a>
               <a href="/website/specialties" className="text-gray-700 hover:text-blue-600">
-                الأقسام
+                التخصصات الطبية
               </a>
               <a href="/website/doctors" className="text-gray-700 hover:text-blue-600">
                 الأطباء
               </a>
               <a href="/website/news" className="text-gray-700 hover:text-blue-600">
                 الأخبار
+              </a>
+              <a href="/website/offers" className="text-gray-700 hover:text-blue-600">
+                العروض
+              </a>
+              <a href="/website/team" className="text-gray-700 hover:text-blue-600">
+                أهالينا
+              </a>
+              <a href="/website/podcast" className="text-gray-700 hover:text-blue-600">
+                البودكاست
+              </a>
+              <a href="/website/events" className="text-gray-700 hover:text-blue-600">
+                الفعاليات
+              </a>
+              <a href="/website/home-health" className="text-gray-700 hover:text-blue-600">
+                الرعاية المنزلية
+              </a>
+              <a href="/website/investors" className="text-gray-700 hover:text-blue-600">
+                المستثمرين
+              </a>
+              <a href="/website/about" className="text-gray-700 hover:text-blue-600">
+                عن المستشفى
               </a>
               <a href="/website/contact" className="text-gray-700 hover:text-blue-600">
                 اتصل بنا
@@ -131,17 +155,41 @@ export default function Website() {
               <a href="/website" className="text-gray-700 hover:text-blue-600 font-medium">
                 الرئيسية
               </a>
-              <a href="/website/about" className="text-gray-700 hover:text-blue-600">
-                عن المستشفى
+              <a href="/website/patients" className="text-gray-700 hover:text-blue-600">
+                المرضى والزوار
+              </a>
+              <a href="/website/branch" className="text-gray-700 hover:text-blue-600">
+                الفرع
               </a>
               <a href="/website/specialties" className="text-gray-700 hover:text-blue-600">
-                الأقسام
+                التخصصات الطبية
               </a>
               <a href="/website/doctors" className="text-gray-700 hover:text-blue-600">
                 الأطباء
               </a>
               <a href="/website/news" className="text-gray-700 hover:text-blue-600">
                 الأخبار
+              </a>
+              <a href="/website/offers" className="text-gray-700 hover:text-blue-600">
+                العروض
+              </a>
+              <a href="/website/team" className="text-gray-700 hover:text-blue-600">
+                أهالينا
+              </a>
+              <a href="/website/podcast" className="text-gray-700 hover:text-blue-600">
+                البودكاست
+              </a>
+              <a href="/website/events" className="text-gray-700 hover:text-blue-600">
+                الفعاليات
+              </a>
+              <a href="/website/home-health" className="text-gray-700 hover:text-blue-600">
+                الرعاية المنزلية
+              </a>
+              <a href="/website/investors" className="text-gray-700 hover:text-blue-600">
+                المستثمرين
+              </a>
+              <a href="/website/about" className="text-gray-700 hover:text-blue-600">
+                عن المستشفى
               </a>
               <a href="/website/contact" className="text-gray-700 hover:text-blue-600">
                 اتصل بنا
