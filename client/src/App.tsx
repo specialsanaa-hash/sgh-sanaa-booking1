@@ -26,6 +26,14 @@ import SpecialtiesPage from "./pages/SpecialtiesPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import NewsPage from "./pages/NewsPage";
 import ContactPage from "./pages/ContactPage";
+import PatientsPage from "./pages/PatientsPage";
+import BranchPage from "./pages/BranchPage";
+import OffersPage from "./pages/OffersPage";
+import OurTeamPage from "./pages/OurTeamPage";
+import PodcastPage from "./pages/PodcastPage";
+import EventsPage from "./pages/EventsPage";
+import HomeHealthPage from "./pages/HomeHealthPage";
+import InvestorsPage from "./pages/InvestorsPage";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,6 +86,14 @@ function Router() {
       <Route path={"/website/doctors"} component={DoctorsPage} />
       <Route path={"/website/news"} component={NewsPage} />
       <Route path={"/website/contact"} component={ContactPage} />
+      <Route path={"/website/patients"} component={PatientsPage} />
+      <Route path={"/website/branch"} component={BranchPage} />
+      <Route path={"/website/offers"} component={OffersPage} />
+      <Route path={"/website/team"} component={OurTeamPage} />
+      <Route path={"/website/podcast"} component={PodcastPage} />
+      <Route path={"/website/events"} component={EventsPage} />
+      <Route path={"/website/home-health"} component={HomeHealthPage} />
+      <Route path={"/website/investors"} component={InvestorsPage} />
       <Route path={"/about"} component={About} />
       <Route path={"/booking"} component={Booking} />
       <Route path={"/booking-types"} component={BookingTypes} />
