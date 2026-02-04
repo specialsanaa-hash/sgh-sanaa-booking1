@@ -116,10 +116,10 @@ export default function Website() {
                 الفعاليات
               </a>
               <a href="/website/home-health" className="text-gray-700 hover:text-blue-600">
-                الرعاية المنزلية
+                خدمات الرعاية المنزلية
               </a>
               <a href="/website/investors" className="text-gray-700 hover:text-blue-600">
-                المستثمرين
+                علاقات المستثمرين
               </a>
               <a href="/website/about" className="text-gray-700 hover:text-blue-600">
                 عن المستشفى
@@ -183,10 +183,10 @@ export default function Website() {
                 الفعاليات
               </a>
               <a href="/website/home-health" className="text-gray-700 hover:text-blue-600">
-                الرعاية المنزلية
+                خدمات الرعاية المنزلية
               </a>
               <a href="/website/investors" className="text-gray-700 hover:text-blue-600">
-                المستثمرين
+                علاقات المستثمرين
               </a>
               <a href="/website/about" className="text-gray-700 hover:text-blue-600">
                 عن المستشفى
