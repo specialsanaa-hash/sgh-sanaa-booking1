@@ -304,9 +304,9 @@ export default function Home() {
             <div>
               <h4 className="font-bold mb-4">روابط سريعة</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/website"><a className="text-slate-400 hover:text-white">الموقع الإلكتروني</a></Link></li>
-                <li><Link href="/website/about"><a className="text-slate-400 hover:text-white">عن المستشفى</a></Link></li>
-                <li><Link href="/website/contact"><a className="text-slate-400 hover:text-white">اتصل بنا</a></Link></li>
+                <li><Link href="/website" className="text-slate-400 hover:text-white">الموقع الإلكتروني</Link></li>
+                <li><Link href="/website/about" className="text-slate-400 hover:text-white">عن المستشفى</Link></li>
+                <li><Link href="/website/contact" className="text-slate-400 hover:text-white">اتصل بنا</Link></li>
               </ul>
             </div>
             <div>
