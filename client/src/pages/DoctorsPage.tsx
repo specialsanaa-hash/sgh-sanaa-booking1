@@ -8,10 +8,10 @@ export default function DoctorsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const doctors = [
-    { name: "د. أحمد محمد", specialty: "طب القلب", rating: 4.8, image: "/doctor1.jpg" },
-    { name: "د. فاطمة علي", specialty: "الأطفال", rating: 4.9, image: "/doctor2.jpg" },
-    { name: "د. محمود حسن", specialty: "العظام", rating: 4.7, image: "/doctor3.jpg" },
-    { name: "د. سارة إبراهيم", specialty: "الجلدية", rating: 4.8, image: "/doctor4.jpg" },
+    { name: "د. أحمد محمد", specialty: "طب القلب", rating: 4.8, image: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/gjwbkZSwiaZVQqSu.jpg" },
+    { name: "د. فاطمة علي", specialty: "الأطفال", rating: 4.9, image: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/LvXgrwRMyElQkmsZ.jpg" },
+    { name: "د. محمود حسن", specialty: "العظام", rating: 4.7, image: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/yLoGfBjvIZCyMDEi.jpg" },
+    { name: "د. سارة إبراهيم", specialty: "الجلدية", rating: 4.8, image: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/gjwbkZSwiaZVQqSu.jpg" },
   ];
 
   return (

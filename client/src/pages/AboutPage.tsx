@@ -142,7 +142,7 @@ export default function AboutPage() {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-16">
             <img
-              src="/صورةالغلاف.jpg"
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/CAcboqnnOtGNOxxq.jpg"
               alt="المستشفى"
               className="rounded-lg shadow-lg w-full h-auto"
             />

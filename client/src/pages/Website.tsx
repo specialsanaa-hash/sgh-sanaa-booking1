@@ -226,9 +226,9 @@ export default function Website() {
             </div>
             <div className="relative">
               <img
-                src="/صورةالغلاف.jpg"
-                alt="المستشفى السعودي الألماني"
-                className="rounded-lg shadow-2xl w-full h-auto"
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/MVrgPgySxftKOnUp.jpg"
+                alt="المستشفى السعودي الألماني - صنعاء"
+                className="rounded-lg shadow-2xl w-full h-auto object-cover"
               />
             </div>
           </div>
@@ -297,9 +297,9 @@ export default function Website() {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <img
-              src="/صورةالغلاف.jpg"
-              alt="عن المستشفى"
-              className="rounded-lg shadow-lg w-full h-auto order-2 md:order-1"
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663116724066/teGNsOSbIedzRKvE.jpg"
+              alt="عن المستشفى السعودي الألماني - صنعاء"
+              className="rounded-lg shadow-lg w-full h-auto object-cover order-2 md:order-1"
             />
             <div className="space-y-6 order-1 md:order-2">
               <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
