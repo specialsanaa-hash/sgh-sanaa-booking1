@@ -128,6 +128,13 @@ function DashboardLayoutContent({
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
 
+  // Auto-collapse sidebar on mobile
+  useEffect(() => {
+    if (isMobile && !isCollapsed) {
+      toggleSidebar();
+    }
+  }, [isMobile]);
+
   useEffect(() => {
     if (isCollapsed) {
       setIsResizing(false);
@@ -166,10 +173,18 @@ function DashboardLayoutContent({
 
   return (
     <>
+      {/* Mobile Sidebar Overlay */}
+      {isMobile && !isCollapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => toggleSidebar()}
+        />
+      )}
+
       <div className="relative" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
-          className="border-r-0"
+          className="border-r-0 hidden md:block"
           disableTransition={isResizing}
         >
           <SidebarHeader className="h-16 justify-center">

@@ -167,16 +167,16 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8" dir="rtl">
+      <div className="space-y-6 md:space-y-8 p-4 md:p-6" dir="rtl">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div className="flex flex-col gap-4 pb-4 md:pb-6 border-b border-slate-200">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">لوحة التحكم</h1>
-            <p className="text-slate-600 mt-2">مرحباً {user?.name}، إدارة الحملات والحجوزات</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-slate-900">لوحة التحكم</h1>
+            <p className="text-sm md:text-base text-slate-600 mt-2">مرحباً {user?.name}، إدارة الحملات والحجوزات</p>
           </div>
           <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg">
+              <Button className="gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg w-full md:w-auto">
                 <Plus className="h-5 w-5" />
                 حملة جديدة
               </Button>
