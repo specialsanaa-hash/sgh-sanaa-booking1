@@ -22,7 +22,7 @@ export default function BookingsManagementPage() {
   // Queries
   const { data: bookings, isLoading, refetch } = trpc.bookings.list.useQuery(
     {
-      formId: formIdFilter ? parseInt(formIdFilter) : undefined,
+      formId: formIdFilter && formIdFilter !== "all" ? parseInt(formIdFilter) : undefined,
     },
     {
       enabled: !!user,
@@ -63,7 +63,7 @@ export default function BookingsManagementPage() {
       booking.patientPhone?.includes(searchTerm) ||
       booking.patientEmail?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = !statusFilter || booking.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || !statusFilter || booking.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   }) || [];
@@ -140,7 +140,7 @@ export default function BookingsManagementPage() {
                     <SelectValue placeholder="جميع الحالات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="pending">قيد الانتظار</SelectItem>
                     <SelectItem value="confirmed">مؤكد</SelectItem>
                     <SelectItem value="cancelled">ملغى</SelectItem>
@@ -155,7 +155,7 @@ export default function BookingsManagementPage() {
                     <SelectValue placeholder="جميع النماذج" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع النماذج</SelectItem>
+                    <SelectItem value="all">جميع النماذج</SelectItem>
                     {forms?.map((form: any) => (
                       <SelectItem key={form.id} value={form.id.toString()}>
                         {form.title}
