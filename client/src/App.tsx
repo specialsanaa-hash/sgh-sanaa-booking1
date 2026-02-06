@@ -19,6 +19,10 @@ import DoctorDetail from "./pages/DoctorDetail";
 import StaticPage from "./pages/StaticPage";
 import ManageDoctors from "./pages/dashboard/ManageDoctors";
 import ManageStaticPages from "./pages/dashboard/ManageStaticPages";
+import BookingsManagementPage from "./pages/dashboard/BookingsManagementPage";
+import BookingDetailsPage from "./pages/dashboard/BookingDetailsPage";
+import FormsManagementPage from "./pages/dashboard/FormsManagementPage";
+import FormPreviewPage from "./pages/dashboard/FormPreviewPage";
 import About from "./pages/About";
 import Website from "./pages/Website";
 import AboutPage from "./pages/AboutPage";
@@ -107,6 +111,10 @@ function Router() {
       <Route path={"/dashboard/form-builder"} component={() => <ProtectedAdminRoute component={FormBuilder} />} />
       <Route path={"/dashboard/manage-doctors"} component={() => <ProtectedAdminRoute component={ManageDoctors} />} />
       <Route path={"/dashboard/manage-pages"} component={() => <ProtectedAdminRoute component={ManageStaticPages} />} />
+      <Route path={"/dashboard/bookings-management"} component={() => <ProtectedAdminRoute component={BookingsManagementPage} />} />
+      <Route path={"/dashboard/bookings-management/:id"} component={() => <ProtectedAdminRoute component={BookingDetailsPage} />} />
+      <Route path={"/dashboard/forms-management"} component={() => <ProtectedAdminRoute component={FormsManagementPage} />} />
+      <Route path={"/dashboard/forms-management/:id"} component={() => <ProtectedAdminRoute component={FormPreviewPage} />} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

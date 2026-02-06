@@ -29,7 +29,8 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "لوحة التحكم", path: "/dashboard" },
-  { icon: BookOpen, label: "الحجوزات", path: "/dashboard/bookings" },
+  { icon: BookOpen, label: "إدارة الحجوزات", path: "/dashboard/bookings-management" },
+  { icon: FileText, label: "إدارة النماذج", path: "/dashboard/forms-management" },
   { icon: Users, label: "إدارة المستخدمين", path: "/dashboard/users" },
   { icon: Stethoscope, label: "إدارة الأطباء", path: "/dashboard/manage-doctors" },
   { icon: FileText, label: "إدارة الصفحات", path: "/dashboard/manage-pages" },
