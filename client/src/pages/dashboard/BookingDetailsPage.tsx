@@ -49,8 +49,8 @@ export default function BookingDetailsPage() {
   });
 
   const handleUpdateStatus = () => {
-    if (newStatus && newStatus !== "") {
-      updateStatusMutation.mutate({ id: bookingId, status: newStatus as any });
+    if (newStatus) {
+      updateStatusMutation.mutate({ id: bookingId, status: newStatus as "pending" | "confirmed" | "cancelled" | "completed" });
     }
   };
 
