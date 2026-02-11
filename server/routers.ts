@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "@shared/const";
+import { messages } from "../drizzle/schema";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, adminProcedure } from "./_core/trpc";
@@ -9,6 +10,7 @@ import { metaRouter } from "./routers/meta";
 import { doctorsRouter } from "./routers/doctors";
 import { staticPagesRouter } from "./routers/staticPages";
 import { doctorBookingsRouter } from "./routers/doctorBookings";
+import { patientsRouter } from "./routers/patients";
 
 export const appRouter = router({
   system: systemRouter,
@@ -264,6 +266,7 @@ export const appRouter = router({
   doctors: doctorsRouter,
   staticPages: staticPagesRouter,
   doctorBookings: doctorBookingsRouter,
+  patients: patientsRouter,
 });
 
 export type AppRouter = typeof appRouter;

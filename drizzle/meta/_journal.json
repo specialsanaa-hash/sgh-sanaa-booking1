@@ -22,6 +22,13 @@
       "when": 1769558523037,
       "tag": "0002_silent_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1770771827987,
+      "tag": "0003_ambiguous_blackheart",
+      "breakpoints": true
     }
   ]
 }

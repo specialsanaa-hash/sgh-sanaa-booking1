@@ -204,3 +204,144 @@ export const doctorBookings = mysqlTable("doctorBookings", {
 
 export type DoctorBooking = typeof doctorBookings.$inferSelect;
 export type InsertDoctorBooking = typeof doctorBookings.$inferInsert;
+
+/**
+ * جدول المرضى (Patients)
+ * يحتفظ بمعلومات المريض الشخصية والطبية الأساسية
+ */
+export const patients = mysqlTable("patients", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }).unique(), // ربط مع جدول المستخدمين
+  nationalId: varchar("nationalId", { length: 20 }).unique(), // رقم الهوية الوطنية
+  phone: varchar("phone", { length: 20 }).notNull(),
+  dateOfBirth: timestamp("dateOfBirth"), // تاريخ الميلاد
+  gender: mysqlEnum("gender", ["male", "female", "other"]), // الجنس
+  bloodType: varchar("bloodType", { length: 10 }), // فصيلة الدم
+  address: text("address"), // العنوان
+  city: varchar("city", { length: 100 }), // المدينة
+  emergencyContact: varchar("emergencyContact", { length: 255 }), // جهة الاتصال الطارئة
+  emergencyPhone: varchar("emergencyPhone", { length: 20 }), // رقم جهة الاتصال الطارئة
+  allergies: text("allergies"), // الحساسيات (JSON)
+  chronicDiseases: text("chronicDiseases"), // الأمراض المزمنة (JSON)
+  currentMedications: text("currentMedications"), // الأدوية الحالية (JSON)
+  insuranceProvider: varchar("insuranceProvider", { length: 255 }), // شركة التأمين
+  insuranceNumber: varchar("insuranceNumber", { length: 100 }), // رقم التأمين
+  profileImage: varchar("profileImage", { length: 500 }), // صورة الملف الشخصي
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Patient = typeof patients.$inferSelect;
+export type InsertPatient = typeof patients.$inferInsert;
+
+/**
+ * جدول المواعيد الطبية (Appointments)
+ * يحتفظ بمواعيد المريض مع الأطباء
+ */
+export const appointments = mysqlTable("appointments", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
+  appointmentDate: timestamp("appointmentDate").notNull(), // موعد الحجز
+  duration: int("duration").default(30).notNull(), // مدة الموعد بالدقائق
+  reason: text("reason"), // سبب الزيارة
+  status: mysqlEnum("status", ["scheduled", "completed", "cancelled", "no-show"]).default("scheduled").notNull(), // حالة الموعد
+  notes: text("notes"), // ملاحظات الطبيب
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = typeof appointments.$inferInsert;
+
+/**
+ * جدول السجل الطبي (MedicalRecords)
+ * يحتفظ بالتقارير والفحوصات الطبية للمريض
+ */
+export const medicalRecords = mysqlTable("medicalRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
+  appointmentId: int("appointmentId").references(() => appointments.id, { onDelete: "set null" }), // ربط مع الموعد
+  recordType: mysqlEnum("recordType", ["diagnosis", "prescription", "lab_report", "imaging", "procedure", "note"]).notNull(), // نوع السجل
+  title: varchar("title", { length: 255 }).notNull(), // عنوان السجل
+  description: text("description"), // وصف السجل
+  findings: text("findings"), // النتائج
+  recommendations: text("recommendations"), // التوصيات
+  attachmentUrl: varchar("attachmentUrl", { length: 500 }), // رابط المرفق (صورة، ملف PDF)
+  isVisible: int("isVisible").default(1).notNull(), // هل السجل مرئي للمريض
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MedicalRecord = typeof medicalRecords.$inferSelect;
+export type InsertMedicalRecord = typeof medicalRecords.$inferInsert;
+
+/**
+ * جدول الرسائل (Messages)
+ * يحتفظ برسائل التواصل بين المريض والطبيب
+ */
+export const messages = mysqlTable("messages", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
+  senderId: int("senderId").notNull().references(() => users.id, { onDelete: "cascade" }), // من أرسل الرسالة (المريض أو الطبيب)
+  subject: varchar("subject", { length: 255 }), // موضوع الرسالة
+  content: text("content").notNull(), // محتوى الرسالة
+  isRead: int("isRead").default(0).notNull(), // هل تم قراءة الرسالة
+  attachmentUrl: varchar("attachmentUrl", { length: 500 }), // رابط المرفق
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
+
+/**
+ * جدول الفواتير (Invoices)
+ * يحتفظ بفواتير المريض والدفعات
+ */
+export const invoices = mysqlTable("invoices", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  appointmentId: int("appointmentId").references(() => appointments.id, { onDelete: "set null" }), // ربط مع الموعد
+  invoiceNumber: varchar("invoiceNumber", { length: 50 }).unique().notNull(), // رقم الفاتورة
+  amount: int("amount").notNull(), // المبلغ بالفلس (لتجنب مشاكل العشرية)
+  currency: varchar("currency", { length: 10 }).default("YER").notNull(), // العملة
+  description: text("description"), // وصف الفاتورة
+  status: mysqlEnum("status", ["pending", "paid", "overdue", "cancelled"]).default("pending").notNull(), // حالة الفاتورة
+  dueDate: timestamp("dueDate"), // تاريخ الاستحقاق
+  paidDate: timestamp("paidDate"), // تاريخ الدفع
+  paymentMethod: varchar("paymentMethod", { length: 50 }), // طريقة الدفع (credit_card, bank_transfer, cash)
+  notes: text("notes"), // ملاحظات
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = typeof invoices.$inferInsert;
+
+/**
+ * جدول الوصفات الطبية (Prescriptions)
+ * يحتفظ بالأدوية الموصوفة للمريض
+ */
+export const prescriptions = mysqlTable("prescriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
+  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
+  appointmentId: int("appointmentId").references(() => appointments.id, { onDelete: "set null" }), // ربط مع الموعد
+  medicationName: varchar("medicationName", { length: 255 }).notNull(), // اسم الدواء
+  dosage: varchar("dosage", { length: 100 }).notNull(), // الجرعة
+  frequency: varchar("frequency", { length: 100 }).notNull(), // التكرار (مثل: 3 مرات يومياً)
+  duration: varchar("duration", { length: 100 }).notNull(), // المدة (مثل: 7 أيام)
+  instructions: text("instructions"), // تعليمات الاستخدام
+  sideEffects: text("sideEffects"), // الآثار الجانبية المحتملة
+  startDate: timestamp("startDate").notNull(), // تاريخ البدء
+  endDate: timestamp("endDate"), // تاريخ الانتهاء
+  isActive: int("isActive").default(1).notNull(), // هل الوصفة نشطة
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Prescription = typeof prescriptions.$inferSelect;
+export type InsertPrescription = typeof prescriptions.$inferInsert;

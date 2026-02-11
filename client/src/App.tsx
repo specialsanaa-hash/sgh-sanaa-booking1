@@ -38,6 +38,9 @@ import PodcastPage from "./pages/PodcastPage";
 import EventsPage from "./pages/EventsPage";
 import HomeHealthPage from "./pages/HomeHealthPage";
 import InvestorsPage from "./pages/InvestorsPage";
+import PatientAuth from "./pages/PatientAuth";
+import PatientDashboard from "./pages/PatientDashboard";
+import PatientAppointments from "./pages/PatientAppointments";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -115,6 +118,9 @@ function Router() {
       <Route path={"/dashboard/bookings-management/:id"} component={() => <ProtectedAdminRoute component={BookingDetailsPage} />} />
       <Route path={"/dashboard/forms-management"} component={() => <ProtectedAdminRoute component={FormsManagementPage} />} />
       <Route path={"/dashboard/forms-management/:id"} component={() => <ProtectedAdminRoute component={FormPreviewPage} />} />
+      <Route path={"/patient/auth"} component={PatientAuth} />
+      <Route path={"/patient/dashboard"} component={PatientDashboard} />
+      <Route path={"/patient/appointments"} component={PatientAppointments} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
