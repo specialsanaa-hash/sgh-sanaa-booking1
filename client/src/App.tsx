@@ -41,6 +41,10 @@ import InvestorsPage from "./pages/InvestorsPage";
 import PatientAuth from "./pages/PatientAuth";
 import PatientDashboard from "./pages/PatientDashboard";
 import PatientAppointments from "./pages/PatientAppointments";
+import PatientMedicalRecords from "./pages/PatientMedicalRecords";
+import PatientMessages from "./pages/PatientMessages";
+import PatientInvoices from "./pages/PatientInvoices";
+import PatientProfile from "./pages/PatientProfile";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -121,6 +125,10 @@ function Router() {
       <Route path={"/patient/auth"} component={PatientAuth} />
       <Route path={"/patient/dashboard"} component={PatientDashboard} />
       <Route path={"/patient/appointments"} component={PatientAppointments} />
+      <Route path={"/patient/medical-records"} component={PatientMedicalRecords} />
+      <Route path={"/patient/messages"} component={PatientMessages} />
+      <Route path={"/patient/invoices"} component={PatientInvoices} />
+      <Route path={"/patient/profile"} component={PatientProfile} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
