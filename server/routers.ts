@@ -29,6 +29,39 @@ export const appRouter = router({
       const { getAllUsers } = await import('./db');
       return getAllUsers();
     }),
+    createUser: adminProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        role: z.enum(["user", "admin"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createUser } = await import('./db');
+        return createUser({
+          name: input.name,
+          email: input.email,
+          role: input.role || 'user',
+          loginMethod: 'email',
+        });
+      }),
+    updateUser: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        email: z.string().email().optional(),
+        role: z.enum(["user", "admin"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updateUser } = await import('./db');
+        const { id, ...data } = input;
+        return updateUser(id, data);
+      }),
+    deleteUser: adminProcedure
+      .input(z.number())
+      .mutation(async ({ input }) => {
+        const { deleteUser } = await import('./db');
+        return deleteUser(input);
+      }),
   }),
 
   campaigns: router({

@@ -96,6 +96,37 @@ export async function getAllUsers() {
   return db.select().from(users).orderBy(users.createdAt);
 }
 
+export async function createUser(data: Omit<InsertUser, 'openId'> & { openId?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const openId = data.openId || `email_${data.email}_${Date.now()}`;
+  
+  const userToInsert: InsertUser = {
+    openId,
+    name: data.name || null,
+    email: data.email || null,
+    loginMethod: data.loginMethod || 'email',
+    role: data.role || 'user',
+    lastSignedIn: new Date(),
+  };
+  
+  const result = await db.insert(users).values(userToInsert);
+  return result;
+}
+
+export async function updateUser(id: number, data: Partial<InsertUser>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(users).set(data).where(eq(users.id, id));
+}
+
+export async function deleteUser(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(users).where(eq(users.id, id));
+}
+
 // ============ Campaigns ============
 export async function getCampaigns() {
   const db = await getDb();

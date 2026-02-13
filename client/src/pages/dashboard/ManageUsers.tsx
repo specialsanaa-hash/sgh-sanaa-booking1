@@ -57,37 +57,50 @@ export default function ManageUsers() {
     setIsDialogOpen(true);
   };
 
+  const updateUserMutation = trpc.auth.updateUser.useMutation({
+    onSuccess: () => {
+      toast.success("تم تحديث المستخدم بنجاح");
+      refetchUsers();
+      setIsDialogOpen(false);
+      setEditingUser(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "حدث خطأ أثناء تحديث المستخدم");
+    },
+  });
+
   const handleSaveUser = async () => {
     if (!editingUser) return;
 
     try {
-      // تحديث المستخدم
-      setUsers(users.map(u => 
-        u.id === editingUser.id 
-          ? { ...u, ...formData }
-          : u
-      ));
-      
-      toast.success("تم تحديث المستخدم بنجاح");
-      setIsDialogOpen(false);
-      setEditingUser(null);
-      refetchUsers();
+      await updateUserMutation.mutateAsync({
+        id: editingUser.id,
+        name: formData.name,
+        email: formData.email,
+        role: formData.role as "admin" | "user",
+      });
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("حدث خطأ أثناء تحديث المستخدم");
     }
   };
+
+  const deleteUserMutation = trpc.auth.deleteUser.useMutation({
+    onSuccess: () => {
+      toast.success("تم حذف المستخدم بنجاح");
+      refetchUsers();
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "حدث خطأ أثناء حذف المستخدم");
+    },
+  });
 
   const handleDeleteUser = async (userId: number) => {
     if (!confirm("هل أنت متأكد من حذف هذا المستخدم؟")) return;
 
     try {
-      setUsers(users.filter(u => u.id !== userId));
-      toast.success("تم حذف المستخدم بنجاح");
-      refetchUsers();
+      await deleteUserMutation.mutateAsync(userId);
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast.error("حدث خطأ أثناء حذف المستخدم");
     }
   };
 
@@ -102,6 +115,19 @@ export default function ManageUsers() {
     setIsDialogOpen(true);
   };
 
+  const createUserMutation = trpc.auth.createUser.useMutation({
+    onSuccess: () => {
+      toast.success("تم إضافة المستخدم بنجاح");
+      refetchUsers();
+      setIsDialogOpen(false);
+      setIsAddingUser(false);
+      setFormData({ name: "", email: "", role: "user" });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "حدث خطأ أثناء إضافة المستخدم");
+    },
+  });
+
   const handleCreateUser = async () => {
     if (!formData.name || !formData.email) {
       toast.error("يرجى ملء جميع الحقول المطلوبة");
@@ -109,27 +135,13 @@ export default function ManageUsers() {
     }
 
     try {
-      // إنشاء مستخدم جديد
-      const newUser = {
-        id: Math.max(...users.map(u => u.id), 0) + 1,
-        ...formData,
-        createdAt: new Date(),
-        loginMethod: "email",
-      };
-      setUsers([...users, newUser]);
-      
-      toast.success("تم إضافة المستخدم بنجاح");
-      setIsDialogOpen(false);
-      setIsAddingUser(false);
-      setFormData({
-        name: "",
-        email: "",
-        role: "user",
+      await createUserMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        role: formData.role as "admin" | "user",
       });
-      refetchUsers();
     } catch (error) {
       console.error("Error creating user:", error);
-      toast.error("حدث خطأ أثناء إضافة المستخدم");
     }
   };
 
