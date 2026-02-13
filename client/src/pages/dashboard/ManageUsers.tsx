@@ -18,6 +18,7 @@ export default function ManageUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "admin" | "user">("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddingUser, setIsAddingUser] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -52,6 +53,7 @@ export default function ManageUsers() {
       email: user.email || "",
       role: user.role || "user",
     });
+    setIsAddingUser(false);
     setIsDialogOpen(true);
   };
 
@@ -86,6 +88,48 @@ export default function ManageUsers() {
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("حدث خطأ أثناء حذف المستخدم");
+    }
+  };
+
+  const handleAddNewUser = () => {
+    setEditingUser(null);
+    setFormData({
+      name: "",
+      email: "",
+      role: "user",
+    });
+    setIsAddingUser(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleCreateUser = async () => {
+    if (!formData.name || !formData.email) {
+      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    try {
+      // إنشاء مستخدم جديد
+      const newUser = {
+        id: Math.max(...users.map(u => u.id), 0) + 1,
+        ...formData,
+        createdAt: new Date(),
+        loginMethod: "email",
+      };
+      setUsers([...users, newUser]);
+      
+      toast.success("تم إضافة المستخدم بنجاح");
+      setIsDialogOpen(false);
+      setIsAddingUser(false);
+      setFormData({
+        name: "",
+        email: "",
+        role: "user",
+      });
+      refetchUsers();
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.error("حدث خطأ أثناء إضافة المستخدم");
     }
   };
 
@@ -159,13 +203,83 @@ export default function ManageUsers() {
               </Select>
 
               <div className="flex gap-2">
-                <Button 
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                  disabled
-                >
-                  <Plus className="h-4 w-4 ml-2" />
-                  إضافة مستخدم جديد
-                </Button>
+                <Dialog open={isDialogOpen && isAddingUser} onOpenChange={(open) => {
+                  if (!open) {
+                    setIsAddingUser(false);
+                  }
+                  setIsDialogOpen(open);
+                }}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      onClick={handleAddNewUser}
+                    >
+                      <Plus className="h-4 w-4 ml-2" />
+                      إضافة مستخدم جديد
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="rtl">
+                    <DialogHeader>
+                      <DialogTitle>إضافة مستخدم جديد</DialogTitle>
+                      <DialogDescription>
+                        أضف مستخدم جديد إلى النظام
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="new-name">الاسم *</Label>
+                        <Input
+                          id="new-name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="أدخل اسم المستخدم"
+                          className="text-right mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-email">البريد الإلكتروني *</Label>
+                        <Input
+                          id="new-email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="أدخل البريد الإلكتروني"
+                          className="text-right mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-role">الدور *</Label>
+                        <Select value={formData.role} onValueChange={(value: any) => setFormData({ ...formData, role: value })}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">مستخدم</SelectItem>
+                            <SelectItem value="admin">مسؤول</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex gap-2 pt-4">
+                        <Button
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          onClick={handleCreateUser}
+                        >
+                          إضافة المستخدم
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            setIsAddingUser(false);
+                          }}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </CardContent>
@@ -225,7 +339,12 @@ export default function ManageUsers() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
-                            <Dialog open={isDialogOpen && editingUser?.id === u.id} onOpenChange={setIsDialogOpen}>
+                            <Dialog open={isDialogOpen && editingUser?.id === u.id} onOpenChange={(open) => {
+                              if (!open) {
+                                setEditingUser(null);
+                              }
+                              setIsDialogOpen(open);
+                            }}>
                               <DialogTrigger asChild>
                                 <Button
                                   variant="outline"
