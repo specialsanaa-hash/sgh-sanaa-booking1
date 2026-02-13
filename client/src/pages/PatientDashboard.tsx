@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Calendar, FileText, MessageSquare, DollarSign, User, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
@@ -26,8 +26,19 @@ export default function PatientDashboard() {
     setLocation("/");
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/patient/auth");
+    }
+  }, [isAuthenticated, setLocation]);
+
+  useEffect(() => {
+    if (!profileQuery.isLoading && !profileQuery.data) {
+      setLocation("/patient/auth");
+    }
+  }, [profileQuery.isLoading, profileQuery.data, setLocation]);
+
   if (!isAuthenticated) {
-    setLocation("/patient/auth");
     return null;
   }
 
@@ -40,7 +51,6 @@ export default function PatientDashboard() {
   }
 
   if (!profileQuery.data) {
-    setLocation("/patient/auth");
     return null;
   }
 

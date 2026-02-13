@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,10 +33,11 @@ export default function PatientAuth() {
   const createProfileMutation = trpc.patients.createProfile.useMutation();
 
   // إذا كان المستخدم مسجل دخول بالفعل وله ملف مريض، أعد التوجيه
-  if (isAuthenticated && getProfileMutation.data) {
-    setLocation("/patient/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated && getProfileMutation.data) {
+      setLocation("/patient/dashboard");
+    }
+  }, [isAuthenticated, getProfileMutation.data, setLocation]);
 
   const handleCreateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +57,7 @@ export default function PatientAuth() {
       });
 
       toast.success("تم إنشاء ملف المريض بنجاح!");
-      setLocation("/patient/dashboard");
+      setTimeout(() => setLocation("/patient/dashboard"), 500);
     } catch (error) {
       console.error("Error creating profile:", error);
       toast.error("حدث خطأ أثناء إنشاء الملف الشخصي");

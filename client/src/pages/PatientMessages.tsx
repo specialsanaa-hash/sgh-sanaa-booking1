@@ -24,8 +24,13 @@ export default function PatientMessages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesQuery.data]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/patient/auth");
+    }
+  }, [isAuthenticated, setLocation]);
+
   if (!isAuthenticated) {
-    setLocation("/patient/auth");
     return null;
   }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,8 +21,13 @@ export default function PatientMedicalRecords() {
     limit: 50,
   });
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/patient/auth");
+    }
+  }, [isAuthenticated, setLocation]);
+
   if (!isAuthenticated) {
-    setLocation("/patient/auth");
     return null;
   }
 
