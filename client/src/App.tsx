@@ -121,9 +121,11 @@ function Router() {
       <Route path={"/dashboard/manage-pages"} component={() => <ProtectedAdminRoute component={ManageStaticPages} />} />
       <Route path={"/dashboard/bookings-management"} component={() => <ProtectedAdminRoute component={BookingsManagementPage} />} />
       <Route path={"/dashboard/bookings-management/:id"} component={() => <ProtectedAdminRoute component={BookingDetailsPage} />} />
-      <Route path={"/dashboard/forms-management"} component={() => <ProtectedAdminRoute component={FormsManagementPage} />} />      <Route path={"/ dashboard/forms-management/:id"} component={() => <ProtectedAdminRoute component={FormPreviewPage} />} />
-      <Route path={"/ dashboard/users"} component={() => <ProtectedAdminRoute component={ManageUsers} />} />
-      <Route path={"/ patient/auth"} component={PatientAuth} />      <Route path={"/patient/dashboard"} component={PatientDashboard} />
+      <Route path={"/dashboard/forms-management"} component={() => <ProtectedAdminRoute component={FormsManagementPage} />} />
+      <Route path={"/dashboard/forms-management/:id"} component={() => <ProtectedAdminRoute component={FormPreviewPage} />} />
+      <Route path={"/dashboard/users"} component={() => <ProtectedAdminRoute component={ManageUsers} />} />
+      <Route path={"/patient/auth"} component={PatientAuth} />
+      <Route path={"/patient/dashboard"} component={PatientDashboard} />
       <Route path={"/patient/appointments"} component={PatientAppointments} />
       <Route path={"/patient/medical-records"} component={PatientMedicalRecords} />
       <Route path={"/patient/messages"} component={PatientMessages} />
