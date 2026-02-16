@@ -22,6 +22,44 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+
+/**
+ * جدول إعدادات الرسائل والاتصال بتطبيق الرسائل
+ */
+export const messageSettings = mysqlTable("messageSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  platformUrl: varchar("platformUrl", { length: 500 }).notNull(),
+  socketUrl: varchar("socketUrl", { length: 500 }).notNull(),
+  apiKey: varchar("apiKey", { length: 255 }).notNull(),
+  isActive: tinyint("isActive").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MessageSettings = typeof messageSettings.$inferSelect;
+export type InsertMessageSettings = typeof messageSettings.$inferInsert;
+
+/**
+ * جدول الرسائل المرسلة والواردة
+ */
+export const messages = mysqlTable("messages", {
+  id: int("id").autoincrement().primaryKey(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
+  messageText: text("messageText").notNull(),
+  messageType: mysqlEnum("messageType", ["SMS", "WhatsApp"]).notNull(),
+  direction: mysqlEnum("direction", ["sent", "received"]).notNull(),
+  status: mysqlEnum("status", ["pending", "sent", "delivered", "failed", "read"]).default("pending").notNull(),
+  externalId: varchar("externalId", { length: 255 }),
+  relatedBookingId: int("relatedBookingId"),
+  relatedPatientId: int("relatedPatientId"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
@@ -281,18 +319,6 @@ export type InsertMedicalRecord = typeof medicalRecords.$inferInsert;
  * جدول الرسائل (Messages)
  * يحتفظ برسائل التواصل بين المريض والطبيب
  */
-export const messages = mysqlTable("messages", {
-  id: int("id").autoincrement().primaryKey(),
-  patientId: int("patientId").notNull().references(() => patients.id, { onDelete: "cascade" }),
-  doctorId: int("doctorId").notNull().references(() => doctors.id, { onDelete: "cascade" }),
-  senderId: int("senderId").notNull().references(() => users.id, { onDelete: "cascade" }), // من أرسل الرسالة (المريض أو الطبيب)
-  subject: varchar("subject", { length: 255 }), // موضوع الرسالة
-  content: text("content").notNull(), // محتوى الرسالة
-  isRead: int("isRead").default(0).notNull(), // هل تم قراءة الرسالة
-  attachmentUrl: varchar("attachmentUrl", { length: 500 }), // رابط المرفق
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
 
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
