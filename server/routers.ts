@@ -13,6 +13,10 @@ import { doctorsRouter } from "./routers/doctors";
 import { staticPagesRouter } from "./routers/staticPages";
 import { doctorBookingsRouter } from "./routers/doctorBookings";
 import { patientsRouter } from "./routers/patients";
+import { messageSettings } from "../drizzle/schema";
+import { desc } from "drizzle-orm";
+import { getDb } from "./db";
+import { TRPCError } from "@trpc/server";
 
 export const appRouter = router({
   system: systemRouter,
@@ -306,6 +310,136 @@ export const appRouter = router({
   staticPages: staticPagesRouter,
   doctorBookings: doctorBookingsRouter,
   patients: patientsRouter,
+
+  messages: router({
+    getAll: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      try {
+        const result = await db.select().from(messages).orderBy(desc(messages.createdAt)).limit(100);
+        return result;
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        return [];
+      }
+    }),
+
+    send: protectedProcedure
+      .input(z.object({
+        phoneNumber: z.string(),
+        messageText: z.string(),
+        messageType: z.enum(["SMS", "WhatsApp"]),
+        relatedBookingId: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        }
+
+        try {
+          const result = await db.insert(messages).values({
+            phoneNumber: input.phoneNumber,
+            messageText: input.messageText,
+            messageType: input.messageType,
+            direction: "sent",
+            status: "sent",
+            relatedBookingId: input.relatedBookingId,
+          });
+          return { success: true, id: (result as any).insertId };
+        } catch (error) {
+          console.error("Error sending message:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to send message" });
+        }
+      }),
+
+    receive: protectedProcedure
+      .input(z.object({
+        phoneNumber: z.string(),
+        messageText: z.string(),
+        messageType: z.enum(["SMS", "WhatsApp"]),
+        externalId: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        }
+
+        try {
+          const result = await db.insert(messages).values({
+            phoneNumber: input.phoneNumber,
+            messageText: input.messageText,
+            messageType: input.messageType,
+            direction: "received",
+            status: "delivered",
+            externalId: input.externalId,
+          });
+          return { success: true, id: (result as any).insertId };
+        } catch (error) {
+          console.error("Error receiving message:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to receive message" });
+        }
+      }),
+
+    updateStatus: protectedProcedure
+      .input(z.object({
+        messageId: z.number(),
+        status: z.enum(["pending", "sent", "delivered", "failed", "read"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        }
+
+        try {
+          await db.update(messages).set({ status: input.status }).where(eq(messages.id, input.messageId));
+          return { success: true };
+        } catch (error) {
+          console.error("Error updating message status:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to update status" });
+        }
+      }),
+
+    getSettings: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      try {
+        const result = await db.select().from(messageSettings).limit(1);
+        return result.length > 0 ? result[0] : null;
+      } catch (error) {
+        console.error("Error fetching message settings:", error);
+        return null;
+      }
+    }),
+
+    saveSettings: adminProcedure
+      .input(z.object({
+        platformUrl: z.string().url(),
+        socketUrl: z.string().url(),
+        apiKey: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        }
+
+        try {
+          const existing = await db.select().from(messageSettings).limit(1);
+          if (existing.length > 0) {
+            await db.update(messageSettings).set(input).where(eq(messageSettings.id, existing[0].id));
+          } else {
+            await db.insert(messageSettings).values(input);
+          }
+          return { success: true };
+        } catch (error) {
+          console.error("Error saving message settings:", error);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to save settings" });
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
