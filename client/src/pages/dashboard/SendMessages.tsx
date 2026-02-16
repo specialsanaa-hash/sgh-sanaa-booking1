@@ -5,7 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
-import { ArrowRight, Send, MessageCircle, Phone } from "lucide-react";
+import { ArrowRight, Send, MessageCircle, Phone, Wifi, WifiOff } from "lucide-react";
+import { useSocket } from "@/hooks/useSocket";
 
 interface Message {
   id: string;
@@ -26,6 +27,12 @@ export default function SendMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [filter, setFilter] = useState<"all" | "sent" | "received">("all");
 
+  // الحصول على إعدادات Socket.io
+  const settings = JSON.parse(
+    localStorage.getItem("messageSettings") || '{"socketUrl": ""}'
+  );
+  const { socket, isConnected } = useSocket(settings.socketUrl);
+
   // تحميل الرسائل من localStorage
   useEffect(() => {
     const savedMessages = localStorage.getItem("messages");
@@ -33,6 +40,46 @@ export default function SendMessages() {
       setMessages(JSON.parse(savedMessages));
     }
   }, []);
+
+  // الاستماع لرسائل جديدة من Socket.io
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("new_message", (data: any) => {
+      console.log("رسالة جديدة مستقبلة:", data);
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        phoneNumber: data.phoneNumber || "غير معروف",
+        messageText: data.message || data.messageText || "",
+        messageType: data.type === "whatsapp" ? "WhatsApp" : "SMS",
+        direction: "received",
+        status: "delivered",
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [newMessage, ...prev]);
+      const allMessages = [newMessage, ...messages];
+      localStorage.setItem("messages", JSON.stringify(allMessages));
+
+      toast.success(
+        `رسالة جديدة من ${newMessage.phoneNumber} عبر ${newMessage.messageType}`
+      );
+    });
+
+    socket.on("message_status", (data: any) => {
+      console.log("تحديث حالة الرسالة:", data);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === data.messageId ? { ...msg, status: data.status } : msg
+        )
+      );
+    });
+
+    return () => {
+      socket.off("new_message");
+      socket.off("message_status");
+    };
+  }, [socket, messages]);
 
   const handleSendMessage = async () => {
     if (!phoneNumber || !messageText) {
@@ -51,6 +98,15 @@ export default function SendMessages() {
         status: "sent",
         createdAt: new Date().toISOString(),
       };
+
+      // إرسال الرسالة عبر Socket.io إذا كان متصلاً
+      if (socket && isConnected) {
+        socket.emit("send_message", {
+          phoneNumber,
+          message: messageText,
+          type: messageType === "WhatsApp" ? "whatsapp" : "sms",
+        });
+      }
 
       const updatedMessages = [newMessage, ...messages];
       setMessages(updatedMessages);
@@ -83,11 +139,26 @@ export default function SendMessages() {
           العودة إلى لوحة التحكم
         </button>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">إرسال الرسائل</h1>
-          <p className="text-muted-foreground">
-            أرسل رسائل نصية عبر SMS أو WhatsApp
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">إرسال الرسائل</h1>
+            <p className="text-muted-foreground">
+              أرسل رسائل نصية عبر SMS أو WhatsApp
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted">
+            {isConnected ? (
+              <>
+                <Wifi className="w-4 h-4 text-green-500" />
+                <span className="text-sm text-green-600">متصل</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-4 h-4 text-red-500" />
+                <span className="text-sm text-red-600">غير متصل</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -155,11 +226,17 @@ export default function SendMessages() {
 
                 <Button
                   onClick={handleSendMessage}
-                  disabled={isSending}
+                  disabled={isSending || !isConnected}
                   className="w-full"
                 >
                   {isSending ? "جاري الإرسال..." : "إرسال الرسالة"}
                 </Button>
+
+                {!isConnected && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs text-yellow-800">
+                    ⚠️ لم يتم الاتصال بتطبيق الرسائل. تحقق من إعدادات Socket.io
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -169,7 +246,7 @@ export default function SendMessages() {
             <Card>
               <CardHeader>
                 <CardTitle>سجل الرسائل</CardTitle>
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-4 flex-wrap">
                   <Button
                     variant={filter === "all" ? "default" : "outline"}
                     size="sm"
