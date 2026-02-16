@@ -3,7 +3,7 @@ import { users } from "../drizzle/schema";
 import { messages } from "../drizzle/schema";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router, adminProcedure } from "./_core/trpc";
+import { publicProcedure, router, adminProcedure, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking, createActivityLog, getActivityLogs } from "./db";
 import { eq } from "drizzle-orm";
