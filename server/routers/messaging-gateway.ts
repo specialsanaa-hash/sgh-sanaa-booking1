@@ -21,7 +21,7 @@ export const messagingGatewayRouter = router({
         timestamp: z.string(),
         externalId: z.string(),
         senderName: z.string().optional(),
-        metadata: z.record(z.any()).optional(),
+        metadata: z.record(z.string(), z.any()).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -66,7 +66,7 @@ export const messagingGatewayRouter = router({
         messageText: z.string(),
         messageType: z.enum(["SMS", "WhatsApp"]),
         recipientName: z.string().optional(),
-        metadata: z.record(z.any()).optional(),
+        metadata: z.record(z.string(), z.any()).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {

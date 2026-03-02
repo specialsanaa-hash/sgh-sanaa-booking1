@@ -108,7 +108,7 @@ export default function PatientDashboard() {
                 <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                 <p className="text-gray-600 text-sm">الرسائل</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {messagesQuery.data?.filter((m) => !m.isRead).length || 0}
+                  {messagesQuery.data?.filter((m) => m.status === 'delivered').length || 0}
                 </p>
               </div>
             </CardContent>
@@ -314,17 +314,17 @@ export default function PatientDashboard() {
                     {messagesQuery.data.map((message) => (
                       <div
                         key={message.id}
-                        className={`border rounded-lg p-4 ${!message.isRead ? "bg-blue-50" : ""}`}
+                        className={`border rounded-lg p-4 ${message.status === 'delivered' ? "bg-blue-50" : ""}`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="font-semibold">{message.subject}</p>
+                            <p className="font-semibold">{message.messageType} - {message.phoneNumber}</p>
                             <p className="text-gray-600 text-sm">
                               {new Date(message.createdAt).toLocaleDateString("ar-SA")}
                             </p>
-                            <p className="text-gray-600 text-sm mt-2">{message.content.substring(0, 100)}...</p>
+                            <p className="text-gray-600 text-sm mt-2">{message.messageText.substring(0, 100)}...</p>
                           </div>
-                          {!message.isRead && (
+                          {message.status === 'delivered' && (
                             <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 whitespace-nowrap ml-4">
                               جديد
                             </span>
