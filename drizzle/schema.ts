@@ -320,9 +320,6 @@ export type InsertMedicalRecord = typeof medicalRecords.$inferInsert;
  * يحتفظ برسائل التواصل بين المريض والطبيب
  */
 
-export type Message = typeof messages.$inferSelect;
-export type InsertMessage = typeof messages.$inferInsert;
-
 /**
  * جدول الفواتير (Invoices)
  * يحتفظ بفواتير المريض والدفعات

@@ -254,7 +254,7 @@ export const patientsRouter = router({
         const result = await db
           .select()
           .from(messages)
-          .where(eq(messages.patientId, patient[0].id))
+          .where(eq(messages.relatedPatientId, patient[0].id))
           .limit(input.limit)
           .offset(input.offset);
 
@@ -291,13 +291,12 @@ export const patientsRouter = router({
         }
 
         const result = await db.insert(messages).values({
-          patientId: patient[0].id,
-          doctorId: input.doctorId,
-          senderId: ctx.user.id,
-          subject: input.subject,
-          content: input.content,
-          attachmentUrl: input.attachmentUrl,
-          isRead: 0,
+          relatedPatientId: patient[0].id,
+          phoneNumber: "",
+          messageText: input.content,
+          messageType: "SMS",
+          direction: "sent",
+          status: "sent",
         });
 
         return { success: true, messageId: (result as any).insertId };
