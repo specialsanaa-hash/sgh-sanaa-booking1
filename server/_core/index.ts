@@ -3,6 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { Server as SocketIOServer } from "socket.io";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -30,6 +31,34 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  
+  // Initialize Socket.io with CORS configuration
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials: true
+    },
+    transports: ["websocket", "polling"]
+  });
+  
+  // Handle Socket.io connections
+  io.on("connection", (socket) => {
+    console.log(`[Socket.io] User connected: ${socket.id}`);
+    
+    // Handle incoming messages from external app
+    socket.on("message", (data) => {
+      console.log(`[Socket.io] Message received:`, data);
+      // Broadcast to all connected clients
+      io.emit("new_message", data);
+    });
+    
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      console.log(`[Socket.io] User disconnected: ${socket.id}`);
+    });
+  });
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -59,6 +88,7 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    console.log(`[Socket.io] Server running on ws://localhost:${port}`);
   });
 }
 
