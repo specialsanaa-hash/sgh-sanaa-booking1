@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, adminProcedure, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getCampaigns, getCampaignById, createCampaign, getFormsByCampaign, getFormById, createForm, updateForm, deleteForm, getFormFields, createFormField, updateFormField, deleteFormField, getBookings, getBookingById, createBooking, updateBooking, deleteBooking, createFormResponse, getFormResponsesByBooking, createActivityLog, getActivityLogs } from "./db";
+import { sendBookingConfirmedMessage, sendBookingCancelledMessage, sendBookingCompletedMessage } from "./services/autoMessages";
 import { eq } from "drizzle-orm";
 import { webhookRouter } from "./routers/webhook";
 import { metaRouter } from "./routers/meta";
@@ -269,6 +270,37 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), status: z.enum(["pending", "confirmed", "cancelled", "completed"]) }))
       .mutation(async ({ input, ctx }) => {
         const result = await updateBooking(input.id, { status: input.status });
+
+        // Get booking data to send auto message
+        const booking = await getBookingById(input.id);
+        if (booking) {
+          const bookingData = booking as any;
+          
+          // Send auto messages based on new status
+          if (input.status === "confirmed") {
+            await sendBookingConfirmedMessage(
+              bookingData.patientPhone,
+              bookingData.patientName,
+              new Date(bookingData.appointmentDate || new Date()).toLocaleDateString("ar-SA"),
+              input.id,
+              "SMS"
+            );
+          } else if (input.status === "cancelled") {
+            await sendBookingCancelledMessage(
+              bookingData.patientPhone,
+              bookingData.patientName,
+              input.id,
+              "SMS"
+            );
+          } else if (input.status === "completed") {
+            await sendBookingCompletedMessage(
+              bookingData.patientPhone,
+              bookingData.patientName,
+              input.id,
+              "SMS"
+            );
+          }
+        }
 
         await createActivityLog({
           userId: ctx.user.id,
