@@ -102,7 +102,6 @@ export type InsertSocketMessageLog = typeof socketMessageLogs.$inferInsert;
  */
 export const messages = mysqlTable("messages", {
   id: int("id").autoincrement().primaryKey(),
-  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
   messageText: text("messageText").notNull(),
   messageType: mysqlEnum("messageType", ["SMS", "WhatsApp"]).notNull(),
   direction: mysqlEnum("direction", ["sent", "received"]).notNull(),

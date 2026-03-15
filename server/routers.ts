@@ -280,7 +280,6 @@ export const appRouter = router({
           // Send auto messages based on new status
           if (input.status === "confirmed") {
             await sendBookingConfirmedMessage(
-              bookingData.patientPhone,
               bookingData.patientName,
               new Date(bookingData.appointmentDate || new Date()).toLocaleDateString("ar-SA"),
               input.id,
@@ -288,14 +287,12 @@ export const appRouter = router({
             );
           } else if (input.status === "cancelled") {
             await sendBookingCancelledMessage(
-              bookingData.patientPhone,
               bookingData.patientName,
               input.id,
               "SMS"
             );
           } else if (input.status === "completed") {
             await sendBookingCompletedMessage(
-              bookingData.patientPhone,
               bookingData.patientName,
               input.id,
               "SMS"
@@ -360,7 +357,6 @@ export const appRouter = router({
 
     send: protectedProcedure
       .input(z.object({
-        phoneNumber: z.string(),
         messageText: z.string(),
         messageType: z.enum(["SMS", "WhatsApp"]),
         relatedBookingId: z.number().optional(),
@@ -373,7 +369,6 @@ export const appRouter = router({
 
         try {
           const result = await db.insert(messages).values({
-            phoneNumber: input.phoneNumber,
             messageText: input.messageText,
             messageType: input.messageType,
             direction: "sent",
@@ -389,7 +384,6 @@ export const appRouter = router({
 
     receive: protectedProcedure
       .input(z.object({
-        phoneNumber: z.string(),
         messageText: z.string(),
         messageType: z.enum(["SMS", "WhatsApp"]),
         externalId: z.string().optional(),
@@ -402,7 +396,6 @@ export const appRouter = router({
 
         try {
           const result = await db.insert(messages).values({
-            phoneNumber: input.phoneNumber,
             messageText: input.messageText,
             messageType: input.messageType,
             direction: "received",

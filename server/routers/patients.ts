@@ -1,7 +1,8 @@
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { getDb } from "../db";
-import { patients, appointments, medicalRecords, messages, invoices, prescriptions, InsertPatient, Patient } from "../../drizzle/schema";
+import { patients, appointments, medicalRecords, messages, invoices, prescriptions, InsertPatient, Patient, Booking } from "../../drizzle/schema";
+import { bookings } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
 export const patientsRouter = router({
@@ -292,7 +293,6 @@ export const patientsRouter = router({
 
         const result = await db.insert(messages).values({
           relatedPatientId: patient[0].id,
-          phoneNumber: "",
           messageText: input.content,
           messageType: "SMS",
           direction: "sent",

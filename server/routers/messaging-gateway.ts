@@ -15,7 +15,6 @@ export const messagingGatewayRouter = router({
   receiveMessage: publicProcedure
     .input(
       z.object({
-        phoneNumber: z.string(),
         messageText: z.string(),
         messageType: z.enum(["SMS", "WhatsApp"]),
         timestamp: z.string(),
@@ -37,7 +36,6 @@ export const messagingGatewayRouter = router({
         // Store the message in the database
         await db.insert(messages).values({
           direction: "received",
-          phoneNumber: input.phoneNumber,
           messageText: input.messageText,
           messageType: input.messageType,
           status: "read",
@@ -62,7 +60,6 @@ export const messagingGatewayRouter = router({
   sendMessage: protectedProcedure
     .input(
       z.object({
-        phoneNumber: z.string(),
         messageText: z.string(),
         messageType: z.enum(["SMS", "WhatsApp"]),
         recipientName: z.string().optional(),
@@ -82,7 +79,6 @@ export const messagingGatewayRouter = router({
         // Store the message in the database
         const result = await db.insert(messages).values({
           direction: "sent",
-          phoneNumber: input.phoneNumber,
           messageText: input.messageText,
           messageType: input.messageType,
           status: "pending",
@@ -107,7 +103,6 @@ export const messagingGatewayRouter = router({
   getMessageHistory: protectedProcedure
     .input(
       z.object({
-        phoneNumber: z.string().optional(),
         limit: z.number().default(50),
         offset: z.number().default(0),
         messageType: z.enum(["SMS", "WhatsApp"]).optional(),
@@ -125,10 +120,6 @@ export const messagingGatewayRouter = router({
 
         const conditions: any[] = [];
         
-        if (input.phoneNumber) {
-          conditions.push(eq(messages.phoneNumber, input.phoneNumber));
-        }
-
         if (input.messageType) {
           conditions.push(eq(messages.messageType, input.messageType));
         }

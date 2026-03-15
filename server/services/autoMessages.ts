@@ -42,7 +42,6 @@ function replaceTemplateVariables(
  * إرسال رسالة تلقائية عند تأكيد الحجز
  */
 export async function sendBookingConfirmedMessage(
-  phoneNumber: string,
   patientName: string,
   appointmentDate: string,
   bookingId: number,
@@ -69,7 +68,6 @@ export async function sendBookingConfirmedMessage(
 
     // حفظ الرسالة في قاعدة البيانات
     const result = await db.insert(messages).values({
-      phoneNumber,
       messageText,
       messageType,
       direction: "sent",
@@ -77,7 +75,7 @@ export async function sendBookingConfirmedMessage(
       relatedBookingId: bookingId,
     });
 
-    console.log(`[Auto Message] Booking confirmed message sent to ${phoneNumber}`);
+    console.log(`[Auto Message] Booking confirmed message sent for booking ${bookingId}`);
 
     return {
       success: true,
@@ -93,7 +91,6 @@ export async function sendBookingConfirmedMessage(
  * إرسال رسالة تلقائية عند إلغاء الحجز
  */
 export async function sendBookingCancelledMessage(
-  phoneNumber: string,
   patientName: string,
   bookingId: number,
   messageType: "SMS" | "WhatsApp" = "SMS"
@@ -118,7 +115,6 @@ export async function sendBookingCancelledMessage(
 
     // حفظ الرسالة في قاعدة البيانات
     const result = await db.insert(messages).values({
-      phoneNumber,
       messageText,
       messageType,
       direction: "sent",
@@ -126,7 +122,7 @@ export async function sendBookingCancelledMessage(
       relatedBookingId: bookingId,
     });
 
-    console.log(`[Auto Message] Booking cancelled message sent to ${phoneNumber}`);
+    console.log(`[Auto Message] Booking cancelled message sent for booking ${bookingId}`);
 
     return {
       success: true,
@@ -142,7 +138,6 @@ export async function sendBookingCancelledMessage(
  * إرسال رسالة تلقائية عند اكتمال الحجز
  */
 export async function sendBookingCompletedMessage(
-  phoneNumber: string,
   patientName: string,
   bookingId: number,
   messageType: "SMS" | "WhatsApp" = "SMS"
@@ -167,7 +162,6 @@ export async function sendBookingCompletedMessage(
 
     // حفظ الرسالة في قاعدة البيانات
     const result = await db.insert(messages).values({
-      phoneNumber,
       messageText,
       messageType,
       direction: "sent",
@@ -175,7 +169,7 @@ export async function sendBookingCompletedMessage(
       relatedBookingId: bookingId,
     });
 
-    console.log(`[Auto Message] Booking completed message sent to ${phoneNumber}`);
+    console.log(`[Auto Message] Booking completed message sent for booking ${bookingId}`);
 
     return {
       success: true,
@@ -191,7 +185,6 @@ export async function sendBookingCompletedMessage(
  * إرسال رسالة تذكير عن الموعد
  */
 export async function sendBookingReminderMessage(
-  phoneNumber: string,
   patientName: string,
   appointmentDate: string,
   bookingId: number,
@@ -218,7 +211,6 @@ export async function sendBookingReminderMessage(
 
     // حفظ الرسالة في قاعدة البيانات
     const result = await db.insert(messages).values({
-      phoneNumber,
       messageText,
       messageType,
       direction: "sent",
@@ -226,7 +218,7 @@ export async function sendBookingReminderMessage(
       relatedBookingId: bookingId,
     });
 
-    console.log(`[Auto Message] Booking reminder message sent to ${phoneNumber}`);
+    console.log(`[Auto Message] Booking reminder message sent for booking ${bookingId}`);
 
     return {
       success: true,

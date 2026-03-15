@@ -318,7 +318,7 @@ export default function PatientDashboard() {
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="font-semibold">{message.messageType} - {message.phoneNumber}</p>
+                            <p className="font-semibold">{message.messageType}</p>
                             <p className="text-gray-600 text-sm">
                               {new Date(message.createdAt).toLocaleDateString("ar-SA")}
                             </p>
