@@ -40,6 +40,64 @@ export type MessageSettings = typeof messageSettings.$inferSelect;
 export type InsertMessageSettings = typeof messageSettings.$inferInsert;
 
 /**
+ * جدول مفاتيح API (API Keys)
+ * لإدارة الوصول الآمن إلى Socket.io
+ */
+export const apiKeys = mysqlTable("apiKeys", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  key: varchar("key", { length: 255 }).notNull().unique(),
+  secret: varchar("secret", { length: 255 }).notNull(),
+  description: text("description"),
+  isActive: tinyint("isActive").default(1).notNull(),
+  lastUsedAt: timestamp("lastUsedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;
+
+/**
+ * جدول اتصالات Socket.io
+ */
+export const socketConnections = mysqlTable("socketConnections", {
+  id: int("id").autoincrement().primaryKey(),
+  apiKeyId: int("apiKeyId").notNull().references(() => apiKeys.id, { onDelete: "cascade" }),
+  socketId: varchar("socketId", { length: 255 }).notNull().unique(),
+  platform: varchar("platform", { length: 50 }),
+  deviceInfo: json("deviceInfo"),
+  batteryLevel: int("batteryLevel"),
+  networkType: varchar("networkType", { length: 50 }),
+  isOnline: tinyint("isOnline").default(1).notNull(),
+  lastHeartbeat: timestamp("lastHeartbeat"),
+  connectedAt: timestamp("connectedAt").defaultNow().notNull(),
+  disconnectedAt: timestamp("disconnectedAt"),
+});
+
+export type SocketConnection = typeof socketConnections.$inferSelect;
+export type InsertSocketConnection = typeof socketConnections.$inferInsert;
+
+/**
+ * جدول سجلات الرسائل عبر Socket.io
+ */
+export const socketMessageLogs = mysqlTable("socketMessageLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  socketConnectionId: int("socketConnectionId").notNull().references(() => socketConnections.id, { onDelete: "cascade" }),
+  messageId: varchar("messageId", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["send_message", "device_status", "message_response"]).notNull(),
+  direction: mysqlEnum("direction", ["sent", "received"]).notNull(),
+  payload: json("payload"),
+  status: mysqlEnum("status", ["pending", "sent", "delivered", "failed"]).default("pending").notNull(),
+  error: text("error"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SocketMessageLog = typeof socketMessageLogs.$inferSelect;
+export type InsertSocketMessageLog = typeof socketMessageLogs.$inferInsert;
+
+/**
  * جدول الرسائل المرسلة والواردة
  */
 export const messages = mysqlTable("messages", {

@@ -15,6 +15,7 @@ import { staticPagesRouter } from "./routers/staticPages";
 import { doctorBookingsRouter } from "./routers/doctorBookings";
 import { patientsRouter } from "./routers/patients";
 import { messagingGatewayRouter } from "./routers/messaging-gateway";
+import { socketioRouter } from "./routers/socketio";
 import { messageSettings } from "../drizzle/schema";
 import { desc } from "drizzle-orm";
 import { getDb } from "./db";
@@ -473,6 +474,7 @@ export const appRouter = router({
         }
       }),
   }),
+  socketio: socketioRouter,
 });
 
 export type AppRouter = typeof appRouter;
