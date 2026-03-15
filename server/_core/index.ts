@@ -3,11 +3,12 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { Server as SocketIOServer } from "socket.io";
+
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { setupSocketIO } from "../socketio-server";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -32,38 +33,16 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   
-  // Initialize Socket.io with CORS configuration
-  const io = new SocketIOServer(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-      credentials: true
-    },
-    transports: ["websocket", "polling"]
-  });
-  
-  // Handle Socket.io connections
-  io.on("connection", (socket) => {
-    console.log(`[Socket.io] User connected: ${socket.id}`);
-    
-    // Handle incoming messages from external app
-    socket.on("message", (data) => {
-      console.log(`[Socket.io] Message received:`, data);
-      // Broadcast to all connected clients
-      io.emit("new_message", data);
-    });
-    
-    // Handle disconnection
-    socket.on("disconnect", () => {
-      console.log(`[Socket.io] User disconnected: ${socket.id}`);
-    });
-  });
+  // Setup Socket.io with custom authentication and event handlers
+  const io = setupSocketIO(server);
   
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
   // tRPC API
   app.use(
     "/api/trpc",
@@ -72,6 +51,11 @@ async function startServer() {
       createContext,
     })
   );
+  
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
@@ -89,6 +73,7 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     console.log(`[Socket.io] Server running on ws://localhost:${port}`);
+    console.log(`[Socket.io] Connection URL: wss://localhost:${port}/socket.io/?apiKey=YOUR_API_KEY`);
   });
 }
 
