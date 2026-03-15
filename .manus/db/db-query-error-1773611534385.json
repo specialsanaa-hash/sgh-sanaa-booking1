@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO apiKeys (userId, name, key, isActive, createdAt, updatedAt) \nVALUES (1, 'Mobile App - Live Test', 'sk_live_test_mobile_app_2026_03_15_production_key_12345', 1, NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute INSERT INTO apiKeys (userId, name, key, isActive, createdAt, updatedAt) \nVALUES (1, 'Mobile App - Live Test', 'sk_live_test_mobile_app_2026_03_15_production_key_12345', 1, NOW(), NOW());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 38 near \"key, isActive, createdAt, updatedAt) ",
+    "VALUES (1, 'Mobile App - Live Test', 'sk_live_test_mobile_app_2026_03_15_production_key_12345', 1, NOW(), NOW())\""
+  ]
+}
