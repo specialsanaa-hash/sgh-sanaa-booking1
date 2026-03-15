@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { setupSocketIO, sendMessageToApp, getConnectionStatus } from '../socketio-server';
+import { setupSocketIO, sendMessageToApp, getActiveConnections } from '../socketio-server';
 
 describe('Socket.io Integration', () => {
   it('should initialize Socket.io server', () => {
@@ -12,9 +12,9 @@ describe('Socket.io Integration', () => {
     expect(typeof sendMessageToApp).toBe('function');
   });
 
-  it('should export getConnectionStatus function', () => {
-    expect(getConnectionStatus).toBeDefined();
-    expect(typeof getConnectionStatus).toBe('function');
+  it('should export getActiveConnections function', () => {
+    expect(getActiveConnections).toBeDefined();
+    expect(typeof getActiveConnections).toBe('function');
   });
 
   it('should have proper Socket.io configuration', () => {

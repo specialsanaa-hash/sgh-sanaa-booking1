@@ -1,0 +1,9 @@
+{
+  "query": "DROP TABLE IF EXISTS messages; DROP TABLE IF EXISTS socketMessageLogs; DROP TABLE IF EXISTS socketConnections; DROP TABLE IF EXISTS apiKeys;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute DROP TABLE IF EXISTS messages; DROP TABLE IF EXISTS socketMessageLogs; DROP TABLE IF EXISTS socketConnections; DROP TABLE IF EXISTS apiKeys;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 776
+}

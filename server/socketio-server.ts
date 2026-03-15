@@ -1,17 +1,57 @@
-import { Server as SocketIOServer, Socket } from 'socket.io';
+import { Socket as SocketIOSocket, Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import { getDb } from './db';
 import { eq } from 'drizzle-orm';
 import { apiKeys, socketConnections, socketMessageLogs } from '../drizzle/schema';
 
-interface AuthenticatedSocket extends Socket {
+interface AuthenticatedSocket extends SocketIOSocket {
   apiKeyId?: number;
   apiKeyName?: string;
+  deviceId?: string;
+}
+
+interface SendMessagePayload {
+  id: string;
+  type: 'whatsapp' | 'sms';
+  phoneNumber: string;
+  message: string;
+  timestamp: number;
+}
+
+interface MessageResponsePayload {
+  messageId: string;
+  status: 'sent' | 'failed' | 'pending';
+  error?: string;
+  timestamp: number;
+}
+
+interface DeviceStatusPayload {
+  timestamp: number;
+  platform: 'android' | 'ios';
+  batteryLevel: number;
+  batteryState: 'unplugged' | 'charging' | 'full';
+  isCharging: boolean;
+  networkType: 'wifi' | 'cellular' | 'none';
+  isOnline: boolean;
+}
+
+interface CommandPayload {
+  id: string;
+  type: 'get_status' | 'clear_queue' | 'restart' | 'ping';
+  timestamp: number;
+}
+
+interface CommandResponsePayload {
+  commandId: string;
+  type: string;
+  status: 'success' | 'failed';
+  result?: Record<string, any>;
+  timestamp: number;
 }
 
 /**
  * إعداد خادم Socket.io
- * يتعامل مع الاتصالات من تطبيق الرسائل الخارجي
+ * يتعامل مع الاتصالات من تطبيق الرسائل الخارجي وفق آلية الربط المتقدمة
  */
 export function setupSocketIO(httpServer: HTTPServer) {
   const io = new SocketIOServer(httpServer, {
@@ -27,7 +67,7 @@ export function setupSocketIO(httpServer: HTTPServer) {
 
   /**
    * Middleware للمصادقة
-   * التحقق من API Key قبل السماح بالاتصال
+   * التحقق من API Key في Query Parameters
    */
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
@@ -62,6 +102,7 @@ export function setupSocketIO(httpServer: HTTPServer) {
       // حفظ معلومات المفتاح في Socket
       socket.apiKeyId = key.id;
       socket.apiKeyName = key.name;
+      socket.deviceId = `device-${key.id}-${Date.now()}`;
 
       // تحديث وقت آخر استخدام
       await db
@@ -86,87 +127,54 @@ export function setupSocketIO(httpServer: HTTPServer) {
       if (!db || !socket.apiKeyId) return;
 
       // تسجيل الاتصال في قاعدة البيانات
-      const [connection] = await db
+      const result = await db
         .insert(socketConnections)
         .values({
           apiKeyId: socket.apiKeyId,
           socketId: socket.id,
+          deviceId: socket.deviceId,
           isOnline: 1,
           connectedAt: new Date(),
         });
 
-      const connectionId = connection.insertId;
+      const connectionId = (result as any).insertId;
 
       /**
-       * حدث إرسال الرسالة من التطبيق الخارجي
-       * البيانات المتوقعة:
-       * {
-       *   id: "msg-12345",
-       *   type: "whatsapp" | "sms",
-       *   phoneNumber: "+966501234567",
-       *   message: "نص الرسالة",
-       *   timestamp: 1678900000000
-       * }
+       * ========================================
+       * أحداث استقبال من التطبيق الخارجي
+       * ========================================
        */
-      socket.on('send_message', async (data) => {
-        console.log(`📤 رسالة جديدة من ${socket.apiKeyName}:`, data.id);
+
+      /**
+       * حدث: message_response
+       * يرسله التطبيق لتأكيد نجاح أو فشل إرسال الرسالة
+       */
+      socket.on('message_response', async (data: MessageResponsePayload) => {
+        console.log(`📨 رد على الرسالة ${data.messageId}: ${data.status}`);
 
         try {
-          // التحقق من صحة البيانات
-          if (!data.id || !data.type || !data.phoneNumber || !data.message) {
-            throw new Error('بيانات الرسالة غير كاملة');
-          }
-
-          if (!['whatsapp', 'sms'].includes(data.type)) {
-            throw new Error('نوع الرسالة غير صحيح');
-          }
-
-          // تسجيل الرسالة في قاعدة البيانات
+          // تحديث حالة الرسالة في قاعدة البيانات
           await db.insert(socketMessageLogs).values({
             socketConnectionId: connectionId,
-            messageId: data.id,
-            type: 'send_message',
-            direction: 'sent',
+            messageId: data.messageId,
+            type: 'message_response',
+            direction: 'received',
             payload: data,
-            status: 'pending',
+            status: (data.status as any),
           });
 
-          // إرسال تأكيد الاستقبال
-          socket.emit('message_received', {
-            messageId: data.id,
-            status: 'received',
-            timestamp: Date.now(),
-          });
-
-          console.log(`✓ تم استقبال الرسالة ${data.id}`);
+          console.log(`✓ تم تسجيل رد الرسالة ${data.messageId}`);
         } catch (error) {
-          console.error(`✗ خطأ في معالجة الرسالة:`, error);
-
-          // إرسال رسالة خطأ
-          socket.emit('message_response', {
-            messageId: data.id,
-            status: 'failed',
-            error: error instanceof Error ? error.message : 'خطأ غير معروف',
-            timestamp: Date.now(),
-          });
+          console.error(`✗ خطأ في معالجة رد الرسالة:`, error);
         }
       });
 
       /**
-       * حدث حالة الجهاز
-       * البيانات المتوقعة:
-       * {
-       *   timestamp: 1678900000000,
-       *   platform: "ios" | "android",
-       *   batteryLevel: 85,
-       *   batteryState: "charging" | "discharging" | "full",
-       *   isCharging: true,
-       *   networkType: "wifi" | "cellular" | "none",
-       *   isOnline: true
-       * }
+       * حدث: device_status
+       * يرسله التطبيق بشكل دوري لتحديث حالة الجهاز
        */
-      socket.on('device_status', async (status) => {
-        console.log(`📱 حالة الجهاز من ${socket.apiKeyName}:`, {
+      socket.on('device_status', async (status: DeviceStatusPayload) => {
+        console.log(`📱 تحديث حالة الجهاز من ${socket.apiKeyName}:`, {
           battery: status.batteryLevel + '%',
           network: status.networkType,
           online: status.isOnline,
@@ -179,6 +187,8 @@ export function setupSocketIO(httpServer: HTTPServer) {
             .set({
               platform: status.platform,
               batteryLevel: status.batteryLevel,
+              batteryState: status.batteryState,
+              isCharging: status.isCharging ? 1 : 0,
               networkType: status.networkType,
               isOnline: status.isOnline ? 1 : 0,
               lastHeartbeat: new Date(),
@@ -207,6 +217,36 @@ export function setupSocketIO(httpServer: HTTPServer) {
           console.error(`✗ خطأ في معالجة حالة الجهاز:`, error);
         }
       });
+
+      /**
+       * حدث: command_response
+       * يرسله التطبيق ردّاً على الأوامر التي يرسلها السيرفر
+       */
+      socket.on('command_response', async (data: CommandResponsePayload) => {
+        console.log(`⚙️ رد على الأمر ${data.commandId}: ${data.status}`);
+
+        try {
+          // تسجيل رد الأمر
+          await db.insert(socketMessageLogs).values({
+            socketConnectionId: connectionId,
+            messageId: data.commandId,
+            type: 'command_response',
+            direction: 'received',
+            payload: data,
+            status: (data.status as any),
+          });
+
+          console.log(`✓ تم تسجيل رد الأمر ${data.commandId}`);
+        } catch (error) {
+          console.error(`✗ خطأ في معالجة رد الأمر:`, error);
+        }
+      });
+
+      /**
+       * ========================================
+       * أحداث الاتصال والقطع
+       * ========================================
+       */
 
       /**
        * حدث قطع الاتصال
@@ -240,27 +280,26 @@ export function setupSocketIO(httpServer: HTTPServer) {
     }
   });
 
+  console.log(`[Socket.io] Server running on ws://localhost:3000`);
+  console.log(`[Socket.io] Connection URL: wss://localhost:3000/socket.io/?apiKey=YOUR_API_KEY`);
+
   return io;
 }
 
 /**
  * دالة لإرسال رسالة من النظام إلى التطبيق الخارجي
- * تُستخدم عند تغيير حالة الحجز
+ * حدث: send_message
  */
 export async function sendMessageToApp(
+  io: SocketIOServer,
   apiKeyId: number,
-  messageData: {
-    id: string;
-    type: 'whatsapp' | 'sms';
-    phoneNumber: string;
-    message: string;
-  }
+  messageData: SendMessagePayload
 ) {
   try {
     const db = await getDb();
-    if (!db) throw new Error('خطأ في الاتصال بقاعدة البيانات');
+    if (!db) throw new Error('Database connection failed');
 
-    // البحث عن الاتصال النشط للمفتاح
+    // البحث عن الاتصالات النشطة لهذا المفتاح
     const connections = await db
       .select()
       .from(socketConnections)
@@ -271,18 +310,28 @@ export async function sendMessageToApp(
       return false;
     }
 
-    // تسجيل الرسالة
-    await db.insert(socketMessageLogs).values({
-      socketConnectionId: connections[0].id,
-      messageId: messageData.id,
-      type: 'send_message',
-      direction: 'sent',
-      payload: messageData,
-      status: 'pending',
-    });
+    // إرسال الرسالة لجميع الاتصالات النشطة
+    let sent = false;
+    for (const connection of connections) {
+      if (connection.isOnline) {
+        io.to(connection.socketId).emit('send_message', messageData);
+        sent = true;
 
-    console.log(`✓ تم تسجيل الرسالة ${messageData.id} للإرسال`);
-    return true;
+        // تسجيل محاولة الإرسال
+        await db.insert(socketMessageLogs).values({
+          socketConnectionId: connection.id,
+          messageId: messageData.id,
+          type: 'send_message',
+          direction: 'sent',
+          payload: messageData,
+          status: 'pending',
+        });
+
+        console.log(`📤 تم إرسال الرسالة ${messageData.id} إلى ${connection.socketId}`);
+      }
+    }
+
+    return sent;
   } catch (error) {
     console.error(`✗ خطأ في إرسال الرسالة:`, error);
     return false;
@@ -290,40 +339,77 @@ export async function sendMessageToApp(
 }
 
 /**
- * دالة للحصول على حالة الاتصال
+ * دالة لإرسال أمر من النظام إلى التطبيق الخارجي
+ * حدث: command
  */
-export async function getConnectionStatus(apiKeyId: number) {
+export async function sendCommandToApp(
+  io: SocketIOServer,
+  apiKeyId: number,
+  commandData: CommandPayload
+) {
   try {
     const db = await getDb();
-    if (!db) throw new Error('خطأ في الاتصال بقاعدة البيانات');
+    if (!db) throw new Error('Database connection failed');
 
+    // البحث عن الاتصالات النشطة لهذا المفتاح
     const connections = await db
       .select()
       .from(socketConnections)
       .where(eq(socketConnections.apiKeyId, apiKeyId));
 
     if (!connections || connections.length === 0) {
-      return {
-        isConnected: false,
-        message: 'لا توجد اتصالات نشطة',
-      };
+      console.warn(`⚠️ لا توجد اتصالات نشطة للمفتاح ${apiKeyId}`);
+      return false;
     }
 
-    const connection = connections[0];
-    return {
-      isConnected: connection.isOnline === 1,
-      socketId: connection.socketId,
-      platform: connection.platform,
-      batteryLevel: connection.batteryLevel,
-      networkType: connection.networkType,
-      lastHeartbeat: connection.lastHeartbeat,
-      connectedAt: connection.connectedAt,
-    };
+    // إرسال الأمر لجميع الاتصالات النشطة
+    let sent = false;
+    for (const connection of connections) {
+      if (connection.isOnline) {
+        io.to(connection.socketId).emit('command', commandData);
+        sent = true;
+
+        // تسجيل الأمر
+        await db.insert(socketMessageLogs).values({
+          socketConnectionId: connection.id,
+          messageId: commandData.id,
+          type: 'command',
+          direction: 'sent',
+          payload: commandData,
+          status: 'pending',
+        });
+
+        console.log(`⚙️ تم إرسال الأمر ${commandData.id} (${commandData.type}) إلى ${connection.socketId}`);
+      }
+    }
+
+    return sent;
   } catch (error) {
-    console.error(`✗ خطأ في الحصول على حالة الاتصال:`, error);
-    return {
-      isConnected: false,
-      error: error instanceof Error ? error.message : 'خطأ غير معروف',
-    };
+    console.error(`✗ خطأ في إرسال الأمر:`, error);
+    return false;
+  }
+}
+
+/**
+ * دالة للحصول على حالة الاتصالات النشطة
+ */
+export async function getActiveConnections(apiKeyId?: number) {
+  try {
+    const db = await getDb();
+    if (!db) throw new Error('Database connection failed');
+
+    let query = db.select().from(socketConnections).where(eq(socketConnections.isOnline, 1));
+
+    if (apiKeyId) {
+      query = db
+        .select()
+        .from(socketConnections)
+        .where(eq(socketConnections.apiKeyId, apiKeyId));
+    }
+
+    return query;
+  } catch (error) {
+    console.error(`✗ خطأ في الحصول على الاتصالات:`, error);
+    return [];
   }
 }
