@@ -122,6 +122,29 @@ sgh-sanaa-booking/
 | إدارة النماذج | `/form-builder/:formId` | إنشاء وتحرير النماذج |
 | تصدير الحجوزات | `/export-bookings` | تصدير البيانات إلى Excel |
 
+## 🔌 تكامل Socket.io مع تطبيق بوابة الرسائل
+
+المنصة مدمجة مع نظام Socket.io المتقدم لإرسال رسائل SMS و WhatsApp تلقائية إلى المرضى.
+
+### رابط الاتصال
+```
+wss://sghsanaa-ba99upcz.manus.space/socket.io/?apiKey=sk_b099b0f8f4860da58325ac2e8860e24057ccf5b588108acf9a8acf3a4e7955c4
+```
+
+### الأحداث المدعومة
+- **send_message** - إرسال رسائل SMS/WhatsApp
+- **message_response** - تقرير حالة الرسالة (sent/failed/pending)
+- **device_status** - تحديثات حالة الجهاز (البطارية، الشبكة)
+- **command** - إرسال أوامر للتطبيق
+- **command_response** - استجابة التطبيق للأوامر
+
+### جداول قاعدة البيانات
+- `apiKeys` - إدارة مفاتيح API
+- `socketConnections` - تتبع الاتصالات النشطة
+- `socketMessageLogs` - سجل جميع الرسائل والأحداث
+
+---
+
 ## الإجراءات المتاحة (tRPC)
 
 ### الحملات (Campaigns)
