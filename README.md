@@ -126,10 +126,12 @@ sgh-sanaa-booking/
 
 المنصة مدمجة مع نظام Socket.io المتقدم لإرسال رسائل SMS و WhatsApp تلقائية إلى المرضى.
 
-### رابط الاتصال
+### رابط الاتصال (الفعال والنشط)
 ```
-wss://sghsanaa-ba99upcz.manus.space/socket.io/?apiKey=sk_b099b0f8f4860da58325ac2e8860e24057ccf5b588108acf9a8acf3a4e7955c4
+wss://3000-i0fiz5orq7hw1j5umznmg-f06edb92.us2.manus.computer/socket.io/?apiKey=sk_b099b0f8f4860da58325ac2e8860e24057ccf5b588108acf9a8acf3a4e7955c4
 ```
+
+**ملاحظة مهمة:** استخدم الرابط أعلاه في تطبيق الموبايل. الدومين الرئيسي قد يتطلب وقتاً إضافياً للتحديث بعد النشر.
 
 ### الأحداث المدعومة
 - **send_message** - إرسال رسائل SMS/WhatsApp

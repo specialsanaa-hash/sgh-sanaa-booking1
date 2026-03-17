@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, MessageSquare, Send, Settings } from "lucide-react";
+import { AlertCircle, CheckCircle2, MessageSquare, Send, Smartphone } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 /**
  * قوالب الرسائل الافتراضية
@@ -86,11 +87,57 @@ export default function AutoMessages() {
 
     setSendingTest(true);
     try {
-      // Simulate sending test message
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      alert("تم إرسال رسالة الاختبار بنجاح!");
+      const response = await fetch("/api/trpc/messaging.sendTestMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: testPhone,
+          message: previewMessage,
+          type: "whatsapp",
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("تم إرسال رسالة الاختبار بنجاح!");
+      } else {
+        toast.error("فشل إرسال الرسالة");
+      }
     } catch (error) {
-      alert("فشل إرسال الرسالة");
+      console.error("خطأ في إرسال الرسالة:", error);
+      toast.error("حدث خطأ في إرسال الرسالة");
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
+  const handleSendQuickTest = async (messageType: "whatsapp" | "sms") => {
+    const phoneNumber = "773171477";
+    setSendingTest(true);
+    try {
+      const testMessage = `رسالة اختبار ${messageType === "whatsapp" ? "واتس آب" : "SMS"} من منصة حجز المستشفى السعودي الألماني - صنعاء`;
+
+      const response = await fetch("/api/trpc/messaging.sendTestMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber,
+          message: testMessage,
+          type: messageType,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(`تم إرسال رسالة ${messageType === "whatsapp" ? "واتس آب" : "SMS"} اختبار بنجاح!`);
+      } else {
+        toast.error("فشل إرسال الرسالة");
+      }
+    } catch (error) {
+      console.error("خطأ في إرسال الرسالة:", error);
+      toast.error("حدث خطأ في إرسال الرسالة");
     } finally {
       setSendingTest(false);
     }
@@ -251,6 +298,37 @@ export default function AutoMessages() {
                     <Send className="h-4 w-4 ml-2" />
                     {sendingTest ? "جاري الإرسال..." : "إرسال رسالة اختبار"}
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* قسم الاختبار السريع */}
+              <Card className="border-green-200 bg-green-50">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Smartphone className="h-5 w-5" />
+                    اختبار سريع - الرقم اليمني 773171477
+                  </CardTitle>
+                  <CardDescription>إرسال رسائل اختبار فورية</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={() => handleSendQuickTest("whatsapp")}
+                      disabled={sendingTest}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Send className="h-4 w-4 ml-2" />
+                      {sendingTest ? "جاري..." : "إرسال WhatsApp"}
+                    </Button>
+                    <Button
+                      onClick={() => handleSendQuickTest("sms")}
+                      disabled={sendingTest}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Send className="h-4 w-4 ml-2" />
+                      {sendingTest ? "جاري..." : "إرسال SMS"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 

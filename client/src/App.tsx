@@ -13,6 +13,7 @@ import ExportBookings from "./pages/ExportBookings";
 import BookingDetails from "./pages/BookingDetails";
 import BookingTypes from "./pages/BookingTypes";
 import MedicalCamps from "./pages/MedicalCamps";
+import CampBooking from "./pages/CampBooking";
 import DoctorBooking from "./pages/DoctorBooking";
 import Doctors from "./pages/Doctors";
 import DoctorDetail from "./pages/DoctorDetail";
@@ -110,10 +111,11 @@ function Router() {
       <Route path={"/about"} component={About} />
       <Route path={"/booking"} component={Booking} />
       <Route path={"/booking-types"} component={BookingTypes} />
-      <Route path={"/medical-camps"} component={MedicalCamps} />
-      <Route path={"/doctors"} component={Doctors} />
-      <Route path={"/doctor/:id"} component={DoctorDetail} />
-      <Route path={"/page/:slug"} component={StaticPage} />
+      <Route path={"/ medical-camps"} component={MedicalCamps} />
+      <Route path={"/ camp/:campId"} component={CampBooking} />
+      <Route path={"/ doctors"} component={Doctors} />
+      <Route path={"/ doctor/:id"} component={DoctorDetail} />
+      <Route path={"/ page/:slug"} component={StaticPage} />
       <Route path={"/booking-details/:id"} component={BookingDetails} />
       <Route path={"/export-bookings"} component={() => <ProtectedAdminRoute component={ExportBookings} />} />
       <Route path={"/dashboard"} component={() => <ProtectedAdminRoute component={Dashboard} />} />
