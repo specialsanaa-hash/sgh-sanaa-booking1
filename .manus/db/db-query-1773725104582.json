@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, name, `key`, secret, isActive, createdAt, lastUsedAt FROM apiKeys ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Ypse83xmvGXFHS.root --database bA99upcZDZKLCyoAaZTtAi --execute SELECT id, name, `key`, secret, isActive, createdAt, lastUsedAt FROM apiKeys ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Mobile App - Live Test",
+      "key": "sk_b099b0f8f4860da58325ac2e8860e24057ccf5b588108acf9a8acf3a4e7955c4",
+      "secret": "3ed6ac371a4072ab158629f6606f1ab8a0c76a921984d70d3ff5325073d1cd5f",
+      "isActive": "1",
+      "createdAt": "2026-03-15 21:54:37",
+      "lastUsedAt": "2026-03-16 00:43:22"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tkey\tsecret\tisActive\tcreatedAt\tlastUsedAt\n1\tMobile App - Live Test\tsk_b099b0f8f4860da58325ac2e8860e24057ccf5b588108acf9a8acf3a4e7955c4\t3ed6ac371a4072ab158629f6606f1ab8a0c76a921984d70d3ff5325073d1cd5f\t1\t2026-03-15 21:54:37\t2026-03-16 00:43:22\n",
+  "stderr": "",
+  "execution_time_ms": 227
+}
