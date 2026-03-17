@@ -56,6 +56,16 @@ async function startServer() {
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+  
+  // Socket.io HTTP endpoint for health check and info
+  app.get("/socket.io/", (req, res) => {
+    res.json({
+      status: "ok",
+      message: "Socket.io server is running",
+      timestamp: new Date().toISOString(),
+      socketioConnected: true
+    });
+  });
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
