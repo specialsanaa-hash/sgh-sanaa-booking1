@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Stethoscope, FileText, BookOpen, MessageSquare } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Stethoscope, FileText, BookOpen, MessageSquare, Wifi } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -32,6 +32,7 @@ const menuItems = [
   { icon: BookOpen, label: "إدارة الحجوزات", path: "/dashboard/bookings-management" },
   { icon: FileText, label: "إدارة النماذج", path: "/dashboard/forms-management" },
   { icon: MessageSquare, label: "الرسائل التلقائية", path: "/dashboard/auto-messages" },
+  { icon: Wifi, label: "مراقبة Socket.io", path: "/dashboard/socketio-monitoring" },
   { icon: Users, label: "إدارة المستخدمين", path: "/dashboard/users" },
   { icon: Stethoscope, label: "إدارة الأطباء", path: "/dashboard/manage-doctors" },
   { icon: FileText, label: "إدارة الصفحات", path: "/dashboard/manage-pages" },

@@ -48,6 +48,7 @@ import PatientMessages from "./pages/PatientMessages";
 import PatientInvoices from "./pages/PatientInvoices";
 import PatientProfile from "./pages/PatientProfile";
 import AutoMessages from "./pages/dashboard/AutoMessages";
+import SocketIOMonitoring from "./pages/dashboard/SocketIOMonitoring";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,7 @@ function Router() {
       <Route path={"/dashboard/forms-management/:id"} component={() => <ProtectedAdminRoute component={FormPreviewPage} />} />
       <Route path={"/dashboard/users"} component={() => <ProtectedAdminRoute component={ManageUsers} />} />
       <Route path={"/dashboard/auto-messages"} component={() => <ProtectedAdminRoute component={AutoMessages} />} />
+      <Route path={"/dashboard/socketio-monitoring"} component={() => <ProtectedAdminRoute component={SocketIOMonitoring} />} />
       <Route path={"/patient/auth"} component={PatientAuth} />
       <Route path={"/patient/dashboard"} component={PatientDashboard} />
       <Route path={"/patient/appointments"} component={PatientAppointments} />
