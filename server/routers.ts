@@ -15,6 +15,7 @@ import { staticPagesRouter } from "./routers/staticPages";
 import { doctorBookingsRouter } from "./routers/doctorBookings";
 import { patientsRouter } from "./routers/patients";
 import { messagingGatewayRouter } from "./routers/messaging-gateway";
+import { messagingRouter } from "./routers/messaging";
 import { socketioRouter } from "./routers/socketio";
 import { messageSettings } from "../drizzle/schema";
 import { desc } from "drizzle-orm";
@@ -342,6 +343,7 @@ export const appRouter = router({
   doctorBookings: doctorBookingsRouter,
   patients: patientsRouter,
   messagingGateway: messagingGatewayRouter,
+  messaging: messagingRouter,
   messages: router({
     getAll: publicProcedure.query(async () => {
       const db = await getDb();

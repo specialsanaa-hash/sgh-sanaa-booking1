@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, MessageSquare, Send, Smartphone } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 /**
  * قوالب الرسائل الافتراضية
@@ -82,65 +83,43 @@ export default function AutoMessages() {
     ? replaceVariables(editedTemplate, testVariables)
     : "";
 
+  const sendTestMutation = trpc.messaging.sendTestMessage.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(error.message || "فشل إرسال الرسالة");
+    },
+  });
+
   const handleSendTest = async () => {
     if (!testPhone || !currentTemplate) return;
 
-    setSendingTest(true);
-    try {
-      const response = await fetch("/api/trpc/messaging.sendTestMessage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber: testPhone,
-          message: previewMessage,
-          type: "whatsapp",
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("تم إرسال رسالة الاختبار بنجاح!");
-      } else {
-        toast.error("فشل إرسال الرسالة");
-      }
-    } catch (error) {
-      console.error("خطأ في إرسال الرسالة:", error);
-      toast.error("حدث خطأ في إرسال الرسالة");
-    } finally {
-      setSendingTest(false);
-    }
+    sendTestMutation.mutate({
+      phoneNumber: testPhone,
+      message: previewMessage,
+      type: "whatsapp",
+    });
   };
 
-  const handleSendQuickTest = async (messageType: "whatsapp" | "sms") => {
+  const sendQuickTestMutation = trpc.messaging.sendTestMessage.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(error.message || "فشل إرسال الرسالة");
+    },
+  });
+
+  const handleSendQuickTest = (messageType: "whatsapp" | "sms") => {
     const phoneNumber = "773171477";
-    setSendingTest(true);
-    try {
-      const testMessage = `رسالة اختبار ${messageType === "whatsapp" ? "واتس آب" : "SMS"} من منصة حجز المستشفى السعودي الألماني - صنعاء`;
+    const testMessage = `رسالة اختبار ${messageType === "whatsapp" ? "واتس آب" : "SMS"} من منصة حجز المستشفى السعودي الألماني - صنعاء`;
 
-      const response = await fetch("/api/trpc/messaging.sendTestMessage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          message: testMessage,
-          type: messageType,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success(`تم إرسال رسالة ${messageType === "whatsapp" ? "واتس آب" : "SMS"} اختبار بنجاح!`);
-      } else {
-        toast.error("فشل إرسال الرسالة");
-      }
-    } catch (error) {
-      console.error("خطأ في إرسال الرسالة:", error);
-      toast.error("حدث خطأ في إرسال الرسالة");
-    } finally {
-      setSendingTest(false);
-    }
+    sendQuickTestMutation.mutate({
+      phoneNumber: phoneNumber,
+      message: testMessage,
+      type: messageType,
+    });
   };
 
   return (
@@ -292,11 +271,11 @@ export default function AutoMessages() {
 
                   <Button
                     onClick={handleSendTest}
-                    disabled={!testPhone || sendingTest}
+                    disabled={!testPhone || sendTestMutation.isPending}
                     className="w-full"
                   >
                     <Send className="h-4 w-4 ml-2" />
-                    {sendingTest ? "جاري الإرسال..." : "إرسال رسالة اختبار"}
+                    {sendTestMutation.isPending ? "جاري الإرسال..." : "إرسال رسالة اختبار"}
                   </Button>
                 </CardContent>
               </Card>
@@ -314,19 +293,19 @@ export default function AutoMessages() {
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       onClick={() => handleSendQuickTest("whatsapp")}
-                      disabled={sendingTest}
+                      disabled={sendQuickTestMutation.isPending}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       <Send className="h-4 w-4 ml-2" />
-                      {sendingTest ? "جاري..." : "إرسال WhatsApp"}
+                      {sendQuickTestMutation.isPending ? "جاري..." : "إرسال WhatsApp"}
                     </Button>
                     <Button
                       onClick={() => handleSendQuickTest("sms")}
-                      disabled={sendingTest}
+                      disabled={sendQuickTestMutation.isPending}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <Send className="h-4 w-4 ml-2" />
-                      {sendingTest ? "جاري..." : "إرسال SMS"}
+                      {sendQuickTestMutation.isPending ? "جاري..." : "إرسال SMS"}
                     </Button>
                   </div>
                 </CardContent>
