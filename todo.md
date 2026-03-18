@@ -213,3 +213,12 @@
 - [x] تحديد سبب فشل إرسال رسالل الاختبار الفورية
 - [x] إصلاح المشكلة في الكود
 - [x] اختبار الحل والتحقق من النجاح
+
+
+## إصلاح إرسال الرسائل عبر Socket.io (Session الحالية)
+- [x] إنشاء جداول قاعدة البيانات (pnpm db:push)
+- [x] تصدير Socket.io instance من server/_core/index.ts
+- [x] تحديث messaging.ts لإرسال الرسائل عبر Socket.io
+- [x] استيراد sendMessageToApp و globalIO
+- [x] تغيير adminProcedure إلى protectedProcedure
+- [ ] اختبار الإرسال الفعلي من لوحة التحكم

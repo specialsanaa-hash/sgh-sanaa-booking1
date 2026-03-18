@@ -3,6 +3,8 @@ import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "../db";
 import { messages } from "../../drizzle/schema";
+import { sendMessageToApp } from "../socketio-server";
+import { globalIO } from "../_core/index";
 
 /**
  * Messaging Router
@@ -11,7 +13,7 @@ import { messages } from "../../drizzle/schema";
 
 export const messagingRouter = router({
   // Send a test message (for testing purposes)
-  sendTestMessage: adminProcedure
+  sendTestMessage: protectedProcedure
     .input(
       z.object({
         phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
@@ -59,14 +61,38 @@ export const messagingRouter = router({
           },
         });
 
-        // In a real scenario, you would integrate with a messaging service here
-        // For now, we'll just log it and mark as sent
-        console.log(`[Test Message] ${input.type} sent to ${input.phoneNumber}`);
+        const messageId = (result as any).insertId || 0;
+
+        // Send the message through Socket.io if available
+        if (globalIO) {
+          // Get all active API keys (devices) to send the message to
+          const apiKeysResult = await db.select().from((await import("../../drizzle/schema")).apiKeys);
+          
+          if (apiKeysResult && apiKeysResult.length > 0) {
+            for (const apiKey of apiKeysResult) {
+              const sent = await sendMessageToApp(globalIO, apiKey.id, {
+                id: `msg-${messageId}-${Date.now()}`,
+                type: input.type,
+                phoneNumber: input.phoneNumber,
+                message: input.message,
+                timestamp: Date.now(),
+              });
+
+              if (sent) {
+                console.log(`[Test Message] رسالة تم إرسالها عبر Socket.io إلى الجهاز ${apiKey.name}`);
+              }
+            }
+          } else {
+            console.warn(`[Test Message] لا توجد أجهزة متصلة لإرسال الرسالة`);
+          }
+        } else {
+          console.warn(`[Test Message] Socket.io غير متاح حالياً`);
+        }
 
         return {
           success: true,
           message: `تم إرسال رسالة ${input.type === "whatsapp" ? "واتس آب" : "SMS"} اختبار بنجاح`,
-          messageId: (result as any).insertId || 0,
+          messageId: messageId,
         };
       } catch (error) {
         console.error("[Messaging] Error sending test message:", error);
@@ -83,7 +109,7 @@ export const messagingRouter = router({
     }),
 
   // Send a custom message
-  sendCustomMessage: adminProcedure
+  sendCustomMessage: protectedProcedure
     .input(
       z.object({
         phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),

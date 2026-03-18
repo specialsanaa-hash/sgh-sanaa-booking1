@@ -29,12 +29,16 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+// Global Socket.io instance for use in routers
+export let globalIO: ReturnType<typeof setupSocketIO> | null = null;
+
 async function startServer() {
   const app = express();
   const server = createServer(app);
   
   // Setup Socket.io with custom authentication and event handlers
   const io = setupSocketIO(server);
+  globalIO = io;
   
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
