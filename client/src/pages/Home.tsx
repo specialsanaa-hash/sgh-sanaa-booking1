@@ -60,11 +60,11 @@ export default function Home() {
                 </>
               )}
               {!isAuthenticated && (
-                <Link href={getLoginUrl()}>
+                <a href={getLoginUrl()} target="_self">
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                     تسجيل الدخول
                   </Button>
-                </Link>
+                </a>
               )}
             </nav>
 
@@ -107,11 +107,11 @@ export default function Home() {
                 </>
               )}
               {!isAuthenticated && (
-                <Link href={getLoginUrl()}>
+                <a href={getLoginUrl()} target="_self">
                   <Button className="w-full bg-blue-600 hover:bg-blue-700">
                     تسجيل الدخول
                   </Button>
-                </Link>
+                </a>
               )}
             </div>
           )}

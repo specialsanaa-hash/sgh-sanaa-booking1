@@ -83,15 +83,14 @@ export default function DashboardLayout({
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign in
-          </Button>
+          <a href={getLoginUrl()} target="_self" className="w-full">
+            <Button
+              size="lg"
+              className="w-full shadow-lg hover:shadow-xl transition-all"
+            >
+              Sign in
+            </Button>
+          </a>
         </div>
       </div>
     );

@@ -52,6 +52,7 @@ import SocketIOMonitoring from "./pages/dashboard/SocketIOMonitoring";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // مكون محمي للـ admin فقط
 function ProtectedAdminRoute({ component: Component }: { component: React.ComponentType }) {
@@ -90,6 +91,19 @@ function Router() {
   React.useEffect(() => {
     document.documentElement.dir = 'rtl';
     document.documentElement.lang = 'ar';
+    
+    // Handle login success/error messages
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login_success') === 'true') {
+      toast.success('تم تسجيل الدخول بنجاح! أهلاً وسهلاً بك');
+      // Clear the query parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (params.get('login_error') === 'true') {
+      toast.error('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى');
+      // Clear the query parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   return (

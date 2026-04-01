@@ -44,10 +44,12 @@ export function registerOAuthRoutes(app: Express) {
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
-      res.redirect(302, "/");
+      // Redirect to dashboard with success message
+      res.redirect(302, "/dashboard?login_success=true");
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+      // Redirect to home page with error message
+      res.redirect(302, "/?login_error=true");
     }
   });
 }
