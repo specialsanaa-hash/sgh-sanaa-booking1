@@ -67,7 +67,13 @@ export function useAuth(options?: UseAuthOptions) {
     if (typeof window === "undefined") return;
     if (window.location.pathname === redirectPath) return;
 
-    window.location.assign(redirectPath)
+    // Disable wouter navigation and use native browser navigation
+    // to avoid SecurityError when navigating to external domain
+    if (redirectPath.includes('manus.im')) {
+      window.location.replace(redirectPath);
+    } else {
+      window.location.assign(redirectPath);
+    }
   }, [
     redirectOnUnauthenticated,
     redirectPath,
