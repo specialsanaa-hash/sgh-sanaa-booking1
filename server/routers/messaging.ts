@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "../db";
 import { messages } from "../../drizzle/schema";
@@ -12,8 +12,8 @@ import { globalIO } from "../_core/index";
  */
 
 export const messagingRouter = router({
-  // Send a test message (for testing purposes)
-  sendTestMessage: protectedProcedure
+  // Send a test message (public - for testing purposes)
+  sendTestMessage: publicProcedure
     .input(
       z.object({
         phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),

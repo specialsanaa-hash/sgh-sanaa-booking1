@@ -33,6 +33,42 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    createTestUser: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل الاتصال بقاعدة البيانات',
+          });
+        }
+
+        const openId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        try {
+          await db.insert(users).values({
+            openId,
+            name: input.name,
+            email: input.email,
+            loginMethod: 'test',
+            role: 'admin',
+          });
+
+          return {
+            success: true,
+            message: 'تم إنشاء مستخدم الاختبار بنجاح',
+          };
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'فشل إنشاء المستخدم',
+          });
+        }
+      }),
     getAllUsers: adminProcedure.query(async () => {
       const { getAllUsers } = await import('./db');
       return getAllUsers();
