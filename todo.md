@@ -222,3 +222,10 @@
 - [x] استيراد sendMessageToApp و globalIO
 - [x] تغيير adminProcedure إلى protectedProcedure
 - [ ] اختبار الإرسال الفعلي من لوحة التحكم
+
+
+## إصلاح خطأ SecurityError في OAuth (Session الحالية)
+- [x] فحص ملفات useAuth.ts والـ getLoginUrl
+- [x] تحديد السبب الدقيق للخطأ في pushState
+- [x] إصلاح طريقة الانتقال إلى صفحة تسجيل الدخول
+- [x] اختبار تسجيل الدخول والتحقق من عمله
