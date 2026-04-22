@@ -17,6 +17,7 @@ import { patientsRouter } from "./routers/patients";
 import { messagingGatewayRouter } from "./routers/messaging-gateway";
 import { messagingRouter } from "./routers/messaging";
 import { socketioRouter } from "./routers/socketio";
+import { authRouter } from "./routers/auth";
 import { messageSettings } from "../drizzle/schema";
 import { desc } from "drizzle-orm";
 import { getDb } from "./db";
@@ -24,94 +25,7 @@ import { TRPCError } from "@trpc/server";
 
 export const appRouter = router({
   system: systemRouter,
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
-    }),
-    createTestUser: publicProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-      }))
-      .mutation(async ({ input }) => {
-        const db = await getDb();
-        if (!db) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل الاتصال بقاعدة البيانات',
-          });
-        }
-
-        const openId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        try {
-          await db.insert(users).values({
-            openId,
-            name: input.name,
-            email: input.email,
-            loginMethod: 'test',
-            role: 'admin',
-          });
-
-          return {
-            success: true,
-            message: 'تم إنشاء مستخدم الاختبار بنجاح',
-          };
-        } catch (error) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'فشل إنشاء المستخدم',
-          });
-        }
-      }),
-    getAllUsers: adminProcedure.query(async () => {
-      const { getAllUsers } = await import('./db');
-      return getAllUsers();
-    }),
-    createUser: adminProcedure
-      .input(z.object({
-        username: z.string().min(1).optional(),
-        name: z.string().min(1),
-        email: z.string().email(),
-        role: z.enum(["user", "admin"]).optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const { createUser } = await import('./db');
-        const bcrypt = await import('bcryptjs');
-        const hashedPassword = await bcrypt.hash('password123', 10);
-        return createUser({
-          username: input.username || input.email || `user_${Date.now()}`,
-          passwordHash: hashedPassword,
-          name: input.name,
-          email: input.email,
-          role: input.role || 'user',
-          loginMethod: 'local',
-        });
-      }),
-    updateUser: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().optional(),
-        email: z.string().email().optional(),
-        role: z.enum(["user", "admin"]).optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const { updateUser } = await import('./db');
-        const { id, ...data } = input;
-        return updateUser(id, data);
-      }),
-    deleteUser: adminProcedure
-      .input(z.number())
-      .mutation(async ({ input }) => {
-        const { deleteUser } = await import('./db');
-        return deleteUser(input);
-      }),
-  }),
+  auth: authRouter,
 
   campaigns: router({
     list: publicProcedure.query(async () => {

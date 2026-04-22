@@ -49,6 +49,7 @@ import PatientInvoices from "./pages/PatientInvoices";
 import PatientProfile from "./pages/PatientProfile";
 import AutoMessages from "./pages/dashboard/AutoMessages";
 import SocketIOMonitoring from "./pages/dashboard/SocketIOMonitoring";
+import Login from "./pages/Login";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -108,6 +109,7 @@ function Router() {
 
   return (
     <Switch>
+      <Route path={"/login"} component={Login} />
       <Route path={"/"} component={Home} />
       <Route path={"/website"} component={Website} />
       <Route path={"/website/about"} component={AboutPage} />
