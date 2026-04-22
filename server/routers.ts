@@ -75,17 +75,22 @@ export const appRouter = router({
     }),
     createUser: adminProcedure
       .input(z.object({
+        username: z.string().min(1).optional(),
         name: z.string().min(1),
         email: z.string().email(),
         role: z.enum(["user", "admin"]).optional(),
       }))
       .mutation(async ({ input }) => {
         const { createUser } = await import('./db');
+        const bcrypt = await import('bcryptjs');
+        const hashedPassword = await bcrypt.hash('password123', 10);
         return createUser({
+          username: input.username || input.email || `user_${Date.now()}`,
+          passwordHash: hashedPassword,
           name: input.name,
           email: input.email,
           role: input.role || 'user',
-          loginMethod: 'email',
+          loginMethod: 'local',
         });
       }),
     updateUser: adminProcedure

@@ -36,6 +36,20 @@
       "when": 1773869565714,
       "tag": "0004_tricky_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1776894249670,
+      "tag": "0005_sour_carmella_unuscione",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776894616266,
+      "tag": "0006_curly_the_leader",
+      "breakpoints": true
     }
   ]
 }
